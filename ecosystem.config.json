@@ -1,0 +1,18 @@
+{
+  "apps": [
+    {
+      "name": "nyon-frontend-app",
+      "script": "npm",
+      "args": "run start:prod",
+      "cwd": "/home/ubuntu/actions-runner-frontend/_work/frontend-app/frontend-app",
+      "instances": 1,
+      "autorestart": true,
+      "watch": false,
+      "time": true,
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": 3001
+      }
+    }
+  ]
+}

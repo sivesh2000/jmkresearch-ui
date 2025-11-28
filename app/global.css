@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+body{
+   font-family: "Roboto", sans-serif;
+}
+:root {
+  --primary-green: #16C098;
+  --primary-blue: #1274b0;
+  --primary-border-radius-Input:20px;
+  --primary-border-radius-Button:100px;
+  --primary-appBar: #f2f2f2;
+  --primary-orange: #FFA500;
+  /* --primary-logo: #73d1f6; */
+  --primary-logo: #1274b0;
+  --primary-red:#b71c1c ;
+  --primary-redBackground: #ffeaea;
+  --primary-blueBackground: #e3f2fd;
+  --primary-yellow: #f57c00; /* Dark yellow/orange */
+  --primary-yellowBackground: #fff8e1; /* Light yellow background */
+  --primary-greenBackground: #e0f7f4;
+}
+.mui-1dxo9r8-MuiButtonBase-root-MuiIconButton-root{
+    display: none;
+}
+.mui-gr4hu4-MuiPaper-root-MuiAppBar-root{
+    background-color:var(--primary-appBar);
+}
+.mui-1t2rogw-MuiTypography-root,.mui-5lzt0n-MuiButtonBase-root-MuiIconButton-root{
+    color:var(--primary-logo)
+}
+
+.main-body-container{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.filters-Input-main-Certificate{
+     display:flex;
+     justify-content: space-between;
+     /* align-items: center; */
+
+}
+.grid-container-view{
+    display: flex;
+    gap:5px
+}
+.typography-common-view{
+    font-weight: bold;
+}
+.marginBottom{
+    margin-bottom: 20px;
+}
+.filters-Input-label{
+    color: var(--primary-green);
+}
+.Input-common{
+    font-size: 11px;
+}
+.button-primary{
+    background-color:var(--primary-blue) ;
+}
+.button-danger{
+    background-color:var(--primary-red) ;
+}
+.button-orange{
+    background-color:var(--primary-orange) ;
+}
+.button-common{
+    border-radius: var(--primary-border-radius-Button);
+    font-size: 0.7rem;
+}
+.radio-button-common .MuiFormControlLabel-label{
+    font-size: 0.8rem !important;
+}
+.buttonColor,
+.mui-beasn0-MuiButtonBase-root-MuiListItemButton-root.Mui-selected .MuiTypography-root,
+.mui-beasn0-MuiButtonBase-root-MuiListItemButton-root.Mui-selected .MuiSvgIcon-root,
+.mui-1f82vtb-MuiButtonBase-root-MuiListItemButton-root.Mui-selected .MuiSvgIcon-root,
+.mui-1f82vtb-MuiButtonBase-root-MuiListItemButton-root.Mui-selected .MuiTypography-root{
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+.MuiListItemButton-root.Mui-selected .MuiTypography-root,
+.MuiListItemButton-root.Mui-selected .MuiSvgIcon-root {
+    color: var(--primary-blue) !important;
+}
+/* Form Styling Classes */
+.form-section-title {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: #000 !important;
+    margin-bottom: 16px !important;
+}
+
+.form-input-field .MuiInputBase-input {
+    font-size: 0.875rem !important;
+    padding: 8px 0 !important;
+}
+
+.form-input-field .MuiInputLabel-root {
+    font-size: 0.875rem !important;
+    color: #666 !important;
+}
+
+.form-input-field .MuiInputLabel-root.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.form-input-field .MuiInputLabel-root.Mui-error {
+    color: #666 !important;
+}
+
+.form-input-field .MuiInputLabel-root.Mui-error.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.form-input-field .MuiInput-underline:after {
+    border-bottom-color: var(--primary-blue) !important;
+}
+
+.form-select-field .MuiSelect-select {
+    font-size: 0.875rem !important;
+    padding: 8px 0 !important;
+}
+
+.form-select-field .MuiInputLabel-root {
+    font-size: 0.875rem !important;
+    color: #666 !important;
+}
+
+.form-select-field .MuiInputLabel-root.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.form-select-field .MuiInputLabel-root.Mui-error {
+    color: #666 !important;
+}
+
+.form-select-field .MuiInputLabel-root.Mui-error.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.form-select-field .MuiInput-underline:after {
+    border-bottom-color: var(--primary-blue) !important;
+}
+
+.form-autocomplete-field .MuiInputBase-input {
+    font-size: 0.875rem !important;
+    padding: 8px 0 !important;
+}
+
+.form-autocomplete-field .MuiInputLabel-root {
+    font-size: 0.875rem !important;
+    color: #666 !important;
+}
+
+.form-autocomplete-field .MuiInputLabel-root.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.form-autocomplete-field .MuiInputLabel-root.Mui-error {
+    color: #666 !important;
+}
+
+.form-autocomplete-field .MuiInputLabel-root.Mui-error.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.form-autocomplete-field .MuiInput-underline:after {
+    border-bottom-color: var(--primary-blue) !important;
+}
+
+.form-checkbox-label .MuiTypography-root {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: #000 !important;
+}
+
+.form-checkbox-label .MuiCheckbox-root {
+    color: var(--primary-blue) !important;
+}
+
+.form-checkbox-label .MuiCheckbox-root.Mui-checked {
+    color: var(--primary-blue) !important;
+}
+
+.form-helper-text {
+    font-size: 0.75rem !important;
+    margin-top: 4px !important;
+}
+
+.form-card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    /* margin-bottom: 24px !important; */
+}
+
+.form-card .MuiCardContent-root {
+    padding: 24px !important;
+}
+
+/* Universal Card Styling for Project-wide Consistency */
+.MuiCard-root {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 24px !important;
+    transition: box-shadow 0.3s ease !important;
+}
+
+.MuiCard-root:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.MuiCard-root .MuiCardContent-root {
+    padding: 24px !important;
+}
+
+.MuiCard-root .MuiCardHeader-root {
+    padding: 24px 24px 16px 24px !important;
+}
+
+.MuiCard-root .MuiCardActions-root {
+    padding: 16px 24px 24px 24px !important;
+}
+
+/* Universal form field styling for consistency */
+.MuiTextField-root .MuiInputLabel-root,
+.MuiFormControl-root .MuiInputLabel-root {
+    font-size: 0.875rem !important;
+    color: #666 !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root.Mui-focused,
+.MuiFormControl-root .MuiInputLabel-root.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root.Mui-error,
+.MuiFormControl-root .MuiInputLabel-root.Mui-error {
+    color: #666 !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root.Mui-error.Mui-focused,
+.MuiFormControl-root .MuiInputLabel-root.Mui-error.Mui-focused {
+    color: var(--primary-blue) !important;
+}
+
+.MuiTextField-root .MuiInputBase-input,
+.MuiFormControl-root .MuiSelect-select {
+    font-size: 0.875rem !important;
+    padding: 8px 0 !important;
+}
+
+.MuiTextField-root .MuiInput-underline:after,
+.MuiFormControl-root .MuiInput-underline:after {
+    border-bottom-color: var(--primary-blue) !important;
+}
+/* for side bar Drawer width */
+.mui-8p6m3b-MuiDrawer-docked,.mui-2sokba,.mui-oc2eyy-MuiPaper-root-MuiDrawer-paper,.mui-syj3su .MuiDrawer-paper,.mui-1arh19y .MuiDrawer-paper,.mui-1arh19y {
+    max-width: 260px;
+}
+
+@media(max-width:768px){
+    .filters-Input-main-Certificate{
+        flex-direction: column;
+        gap:10px
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem !important;
+    }
+    
+    .form-input-field .MuiInputBase-input,
+    .form-select-field .MuiSelect-select,
+    .form-autocomplete-field .MuiInputBase-input {
+        font-size: 0.8rem !important;
+    }
+    
+    .form-input-field .MuiInputLabel-root,
+    .form-select-field .MuiInputLabel-root,
+    .form-autocomplete-field .MuiInputLabel-root {
+        font-size: 0.8rem !important;
+    }
+}
+.custom-row-padding .MuiDataGrid-cell {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+.jodit-popup {
+  left: unset !important;
+  right: unset !important;
+}
+.jodit-ui-tooltip-container {
+  display: none !important;
+}
+
+.viewContentSize{
+    font-size: 0.7rem;
+}
+.mui-9w3rkc{
+    position: fixed !important;
+    right: 70px !important;
+    pointer-events: none !important; 
+    cursor: default !important;  
+    user-select: none !important;   
+}
+/* certificate cancelled row status */
+.cancelled-row {
+  background-color: var(--primary-redBackground) !important; /* light red */
+  color: var(--primary-red) !important;           /* dark red text */
+}
+
+.renewal-row {
+  background-color: var(--primary-blueBackground) !important; /* light blue */
+  color: var(--primary-logo);            /* blue text */
+}
+.archived-row {
+  background-color: var(--primary-yellowBackground) !important; /* light yellow */
+  color: var(--primary-yellow) !important;                      /* dark yellow text */
+}
