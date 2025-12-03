@@ -39,16 +39,18 @@ export default function SignIn() {
       slots={{
         forgotPasswordLink: ForgotPasswordLink,
       }}
-  slotProps={{
-    emailField: {
-      variant: "standard", // Change input variant
-      // size: "medium",      // Change input size
-    },
-    passwordField: {
-      variant: "standard", // Change input variant
-      // size: "medium",      // Change input size
-    }
-  }}
+      slotProps={{
+        emailField: {
+          variant: "standard", // Change input variant
+          // size: "medium",      // Change input size
+          defaultValue:"admin@jmkresearch.com"
+        },
+        passwordField: {
+          variant: "standard", // Change input variant
+          // size: "medium",      // Change input size
+          defaultValue:"nyomxAdmin@10#"
+        }
+      }}
     />
   );
 }

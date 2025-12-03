@@ -10,7 +10,7 @@ import OptimizedLayout from "./components/OptimizedLayout";
 import { Suspense } from "react";
 import { CircularProgress, Box } from "@mui/material";
 export const metadata = {
-  title: "Nyom",
+  title: "JMK Research & Analytics",
   description: "",
 };
 
@@ -23,30 +23,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <AppProviders session={session}>
           <AppRouterCacheProvider options={{ enableCssLayer: true }}>
             <OptimizedLayout session={session} theme={theme}>
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss={false}
-                draggable
-                pauseOnHover
-                limit={3}
-              />
-              <Suspense
-                fallback={
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    minHeight="200px"
-                  >
-                    <CircularProgress />
-                  </Box>
-                }
-              >
+              <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick
+                rtl={false} pauseOnFocusLoss={false} draggable pauseOnHover limit={3} />
+              <Suspense fallback={<Box display="flex" justifyContent="center" alignItems="center" minHeight="200px"><CircularProgress /></Box>}>
                 {props.children}
               </Suspense>
             </OptimizedLayout>

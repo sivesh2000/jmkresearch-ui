@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "nyon-frontend-app",
+      "name": "jmk-frontend-app",
       "script": "npm",
       "args": "run start:prod",
       "cwd": "/home/ubuntu/actions-runner-frontend/_work/frontend-app/frontend-app",

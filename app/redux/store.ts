@@ -14,6 +14,7 @@ import assignedPermissionsReducer from "./slices/rolesPermissionsSlices/assigned
 import helpdeskReducer from "./slices/helpdeskSlices/helpdeskSlice";
 import helpDeskMappingReducer from "./slices/helpDeskMappingSlices/helpDeskMappingSlice";
 import allAssignRolesReducer from "./slices/userSlices/allAssignRolesSlice";
+import companyReducer from "./slices/companySlices/ActiveCompaniesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     helpdeskData: helpdeskReducer,
     helpDeskMapping: helpDeskMappingReducer,
     allAssignRolesUserData: allAssignRolesReducer,
+    activeCompanies: companyReducer,
   },
 });
 

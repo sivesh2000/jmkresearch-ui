@@ -18,6 +18,8 @@ import type { Navigation } from "@toolpad/core/AppProvider";
 import { signIn, signOut } from "next-auth/react";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import TwoWheelerOutlinedIcon from "@mui/icons-material/TwoWheelerOutlined";
+import SettingsSystemDaydreamOutlined from "@mui/icons-material/SettingsSystemDaydreamOutlined";
+
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
@@ -35,7 +37,7 @@ interface OptimizedLayoutProps {
 }
 
 const getBranding = (session: any) => ({
-  title: "NYOM",
+  title: '',
   logo: (
     <div
       style={{
@@ -45,7 +47,7 @@ const getBranding = (session: any) => ({
         gap: 12,
       }}
     >
-      <img src="/logo.png" alt="Nyom Logo" style={{ height: 40 }} />
+      <img src="/logo.png" alt="JMK Logo" style={{ height: 40 }} />
     </div>
   ),
 });
@@ -110,6 +112,12 @@ export default function OptimizedLayout({
               icon: <StarBorderOutlinedIcon />,
               //permission: MASTER_DATA_VIEW,
               children: [
+                {
+                  segment: "company",
+                  title: "Company",
+                  icon: <SettingsSystemDaydreamOutlined />,
+                  pattern: "company{/:companyId}*",
+                },
                 {
                   segment: "make",
                   title: "Make",
