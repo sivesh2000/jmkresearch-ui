@@ -8,8 +8,10 @@ import { PageContainer } from "@toolpad/core";
 import {
   Box, Button, IconButton, Menu, MenuItem, Modal, TextField, Typography,
   FormControl, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent,
-  DialogContentText, DialogActions, Chip, InputLabel, Select
+  DialogContentText, DialogActions, Chip, InputLabel, Select, ListItemText, Checkbox,
+  List, ListItem, ListItemButton, ListItemIcon, Tooltip
 } from "@mui/material";
+
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -26,8 +28,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
 import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
-import { options, set } from "jodit/esm/core/helpers";
-
+import { parseQueryParams } from '../../../../utils/functions';
+import { buildPayload } from '../helper';
+import ExportData from "@/app/components/ExportData";
+import ImportData from "@/app/components/ImportData";
 const Page = memo(function Page() {
   const dispatch = useDispatch();
   const { activeCompanies, isLoading, error, players } = useSelector((state: RootState) => state.activeCompanies);
@@ -41,14 +45,64 @@ const Page = memo(function Page() {
   const [isDrawer, setDrawer] = useState(false);
   const [drawerAction, setDrawerAction] = useState<'filter' | 'add' | 'edit' | 'import' | 'export'>('filter');
   const open = Boolean(anchorEl);
+  const [selCol, setSelCol] = useState<GridColDef[]>([]);
+  const optionalColumns: GridColDef[] = [
+    { field: "website", headerName: "Website", flex: 1 },
+    { field: "slug", headerName: "Slug", flex: 1 },
+    { field: "createdAt", headerName: "Created", flex: 1 },
+    { field: "updatedAt", headerName: "Updated", flex: 1 },
+    {
+      field: "isVerified", headerName: "Verification", flex: 1, renderCell: (params: any) =>
+        params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />
+        ) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
+    },
+    { field: "contactInfo.country", headerName: "Country", flex: 1 },
+    { field: "contactInfo.email", headerName: "Email", flex: 1 },
+    { field: "contactInfo.phone", headerName: "Phone", flex: 1 },
+    { field: "contactInfo.address", headerName: "Address", flex: 1 },
+    { field: "contactInfo.city", headerName: "City", flex: 1 },
+    { field: "contactInfo.state", headerName: "State", flex: 1 },
+    { field: "contactInfo.pincode", headerName: "Pincode", flex: 1 },
+  ];
 
   const filterColumns: any[] = [
     { field: "name", headerName: "Company Name", type: 'textbox' },
+    { field: "playerType", multiple: true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
     { field: "description", headerName: "Brief Overview", type: 'textbox' },
-    { field: "status", headerName: "Status", type: 'switch' },
-    { field: "playerType",multiple:true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
-    { field: "isActive", headerName: "Status", type: 'dropdown', options: [{ key: "Active", value: true }, { key: "In-Active", value: false }], optionLabelField: 'key', optionValueField: 'value' },
+    { field: "slug", headerName: "Slug", type: 'textbox' },
+    { field: "website", headerName: "Website", type: 'textbox' },
+    { field: "logoUrl", headerName: "Logo Url", type: 'textbox' },
+    {
+      field: 'contactInfo', headerName: "Contact Information", type: 'title', fields: [
+        { field: "email", headerName: "Email Address", type: 'textbox' },
+        { field: "phone", headerName: "Contact/Phone Number", type: 'textbox' },
+        { field: "address", headerName: "Address", type: 'textbox' },
+        { field: "city", headerName: "City", type: 'textbox' },
+        { field: "state", headerName: "State", type: 'textbox' },
+        { field: "country", headerName: "Country", type: 'textbox' },
+        { field: "pincode", headerName: "Pincode", type: 'textbox' },
+      ]
+    },
+    {
+      field: 'socialLinks', headerName: "Social Links", type: 'title', fields: [
+        { field: "linkedin", headerName: "LinkedIn", type: 'textbox' },
+        { field: "twitter", headerName: "Twitter", type: 'textbox' },
+        { field: "facebook", headerName: "Facebook", type: 'textbox' },
+      ]
+    },
+    {
+      field: 'businessDetails', headerName: "Business Details", type: 'title', fields: [
+        { field: "establishedYear", headerName: "Established Year", type: 'textbox' },
+        { field: "employeeCount", headerName: "Employee Count", type: 'textbox' },
+        { field: "revenue", headerName: "Revenue", type: 'textbox' },
+        { field: "certifications", headerName: "Certifications", type: 'textbox' },
+      ]
+    },
   ];
+  // socialLinks: { linkedin: "", twitter: "", facebook: "" },
+  // businessDetails: { establishedYear: new Date().getFullYear(), employeeCount: "", revenue: "", certifications: [] },
+  // tags: [],
+  // isActive: true
 
   const fetcCompanies = useCallback(async () => {
     try {
@@ -69,7 +123,7 @@ const Page = memo(function Page() {
     // console.log("Active Makes:", activeCompanies);
   }, [activeCompanies]);
 
-  const columns: GridColDef[] = useMemo(() => [
+  const [columns, setColumns] = useState<GridColDef[]>([
     { field: "name", headerName: "Company Name", flex: 1 },
     { field: "description", headerName: "Brief Overview", flex: 1 },
     { field: "playerType", headerName: "Player Type", flex: 1 },
@@ -84,11 +138,32 @@ const Page = memo(function Page() {
           <MoreVertIcon color="action" />
         </IconButton>
       ),
-    },
+    }
+  ]);
 
-  ],
-    []
-  );
+  useEffect(() => {
+    if (selCol) {
+      setColumns([
+        { field: "name", headerName: "Company Name", flex: 1 },
+        { field: "description", headerName: "Brief Overview", flex: 1 },
+        { field: "playerType", headerName: "Player Type", flex: 1 },
+        {
+          field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) =>
+            params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />
+            ) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
+        },
+        ...selCol,
+        {
+          field: "actions", headerName: "Actions", width: 100, renderCell: (params) => (
+            <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
+              <MoreVertIcon color="action" />
+            </IconButton>
+          ),
+        }
+      ])
+    }
+  }, [selCol])
+
 
   const paginationModel = useMemo(() => ({ page: 0, pageSize: 5 }), []);
 
@@ -160,29 +235,9 @@ const Page = memo(function Page() {
         toast.success("Make updated successfully!");
       } else {
         const addFunction = addCompany(dispatch);
-        const payload = {
-          name: data?.name,
-          playerType: data?.playerType,
-          description: data?.description,
-          website: data?.website,
-          slug: data?.slug || data?.name?.toLowerCase().replace(/\s+/g, '-'),
-          logoUrl: "",
-          contactInfo: {
-            email: "",
-            phone: "",
-            address: "",
-            city: "",
-            state: "",
-            country: "",
-            pincode: ""
-          },
-          socialLinks: { linkedin: "", twitter: "", facebook: "" },
-          businessDetails: { establishedYear: new Date().getFullYear(), employeeCount: "", revenue: "", certifications: [] },
-          tags: [],
-          isActive: true
-        }
-        const resp =await addFunction(payload);
-        console.log("Response", resp)
+        const payload = buildPayload(data);
+        const resp = await addFunction(payload);
+        console.log("resp", resp);
         setDrawer(false);
         toast.success("Company created successfully!");
       }
@@ -198,6 +253,7 @@ const Page = memo(function Page() {
 
   const handleFilter = (params: any) => {
     console.log("Params", params)
+    getAllActiveCompanies(dispatch, params)();
     setDrawer(false);
   }
 
@@ -224,13 +280,9 @@ const Page = memo(function Page() {
         position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" },
         width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 },
         borderRadius: { xs: 0, sm: 2 }, overflow: "auto",
-      }}
-      >
+      }}>
         <Typography variant="h6" component="h2" mb={3}>{isEdit ? "Edit Company" : "Add New Company"}</Typography>
-
         <TextField fullWidth variant="standard" label="Company Name" value={formData.make_name} onChange={(e) => handleInputChange("company_name", e.target.value)} margin="normal" />
-
-
         <FormControl fullWidth variant="standard" margin="normal">
           <InputLabel>Player Type</InputLabel>
           <Select
@@ -247,8 +299,6 @@ const Page = memo(function Page() {
         </FormControl>
         <TextField fullWidth variant="standard" label="Brief Overview" value={formData.make_name} onChange={(e) => handleInputChange("brief_overview", e.target.value)} margin="normal" />
         <TextField fullWidth variant="standard" label="Address" value={formData.make_name} onChange={(e) => handleInputChange("address", e.target.value)} margin="normal" />
-
-
         <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
           <Button className="button-common button-primary" variant="contained" onClick={handleSave} fullWidth>Save</Button>
           <Button className="button-common buttonColor" variant="outlined" onClick={handleModalClose} fullWidth>Cancel</Button>
@@ -277,6 +327,67 @@ const Page = memo(function Page() {
     setDrawerAction(action);
     setDrawer(true);
   }
+
+  const ColSelector: React.FC = ({ options, selCol, setSelCol }: any) => {
+    const [viewCols, setViewCols] = useState(false);
+    const [checked, setChecked] = useState<any[]>(selCol || []);
+
+    const handleToggle = (value: any) => {
+      console.log("Value", checked)
+      const isExist = checked.find(x => x.field === value.field);
+      if (isExist) {
+        setChecked(checked.filter(x => x.field !== value.field));
+      } else {
+        setChecked([...checked, value]);
+      }
+
+    };
+
+    return (
+      <>
+        <Tooltip title="Columns selection" placement="top">
+          <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => setViewCols(true)}>
+            <SettingsIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Modal open={viewCols} onClose={() => setViewCols(false)}>
+          <Box sx={{
+            position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" },
+            width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 },
+            borderRadius: { xs: 0, sm: 2 }, overflow: "auto",
+          }}>
+            <Typography variant="h6" mb={3}>Select Columns</Typography>
+
+            <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', position: 'relative', overflow: 'auto', maxHeight: 300, '& ul': { padding: 0 }, }}>
+              {options.map((e: GridColDef) => {
+                const labelId = `checkbox-list-label-${e.field}`;
+                return (
+                  <ListItem key={e.field} disablePadding>
+                    <ListItemButton onClick={() => handleToggle(e)} dense>
+                      <ListItemIcon>
+                        <Checkbox edge="start" checked={checked.includes(e)} tabIndex={-1} disableRipple inputProps={{ "aria-labelledby": labelId }} />
+                      </ListItemIcon>
+                      <ListItemText id={labelId} primary={e.headerName} />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
+
+            <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
+              <Button className="button-common button-primary" variant="contained" fullWidth onClick={() => {
+                console.log("Selected", checked)
+                setSelCol(checked);
+                // setViewCols(false);
+              }}>OK</Button>
+              <Button className="button-common buttonColor" variant="outlined" fullWidth onClick={() => setViewCols(false)} >Cancel</Button>
+            </Box>
+          </Box>
+        </Modal>
+      </>
+    );
+  };
+
   return (
     <PageContainer>
       <Paper sx={{ height: "auto", width: "100%" }}>
@@ -293,27 +404,25 @@ const Page = memo(function Page() {
             </Box>
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
-            <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
-              <SettingsIcon fontSize="small" />
-            </IconButton>
+            <ColSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
             <PermissionCheck action={OEM_ADD}>
-              <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
-                <AddIcon fontSize="small" />
-              </IconButton>
+              <Tooltip title="Add New Company" placement="top">
+                <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </PermissionCheck>
             <PermissionCheck action={OEM_ADD}>
-              <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('export')}>
-                <DownloadIcon fontSize="small" />
-              </IconButton>
+              <ExportData dataArray={activeCompanies} type={'button'} columns={columns} />
             </PermissionCheck>
             <PermissionCheck action={OEM_ADD}>
-              <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('import')}>
-                <UploadIcon fontSize="small" />
-              </IconButton>
+              <ImportData title="Import Data" />
             </PermissionCheck>
-            <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('filter')}>
-              <Filter1OutlinedIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Filter company data" placement="top">
+              <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('filter')}>
+                <Filter1OutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
         <LazyDataGrid rows={activeCompanies} getRowId={(row: any) => row.id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
@@ -321,11 +430,12 @@ const Page = memo(function Page() {
       <MenuComponent />
       <CompanyModel />
       <DeleteDialog />
-      <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
       <CommonDrawer title={'Add New Company'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Edit Company'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Import Data'} isOpen={isDrawer && drawerAction === 'import'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Import" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Export Data'} isOpen={isDrawer && drawerAction === 'export'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Export" buttonCancelLabel="Cancel" />
+      {JSON.stringify(selCol)}
     </PageContainer>
   );
 });

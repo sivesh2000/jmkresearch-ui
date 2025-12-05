@@ -1,17 +1,21 @@
 import axiosInstance from "../axiosIntance"
 import { setCompanies, setLoading, setError, setFilterPlayers } from "@/app/redux/slices/companySlices/ActiveCompaniesSlice"
 import { Dispatch } from "@reduxjs/toolkit"
+import { parseQueryParams } from "@/app/utils/functions"
 
-export const getAllActiveCompanies = (dispatch: Dispatch) => async () => {
+export const getAllActiveCompanies = (dispatch: Dispatch, filters: any) => async () => {
     try {
         dispatch(setLoading(true));
-        const response = await axiosInstance.get('companies');
+        const queryParam = parseQueryParams(filters,'');
+        const url = 'companies?' + queryParam;
+        const response = await axiosInstance.get(url);
         const companies = response?.data?.results || []
         dispatch(setCompanies(companies));
         dispatch(setError(null));
     } catch (error) {
         console.error('Error fetching companies:', error);
         dispatch(setError('Failed to fetch companies'));
+        dispatch(setCompanies([]));
         throw error;
     } finally {
         dispatch(setLoading(false));
