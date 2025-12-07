@@ -19,6 +19,8 @@ import { signIn, signOut } from "next-auth/react";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import TwoWheelerOutlinedIcon from "@mui/icons-material/TwoWheelerOutlined";
 import SettingsSystemDaydreamOutlined from "@mui/icons-material/SettingsSystemDaydreamOutlined";
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LockResetIcon from "@mui/icons-material/LockReset";
@@ -28,6 +30,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import ContactSupportOutlinedIcon from "@mui/icons-material/ContactSupportOutlined";
 import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import LocationCityIcon from '@mui/icons-material/LocationCity';
 import "../global.css";
 
 interface OptimizedLayoutProps {
@@ -117,6 +120,24 @@ export default function OptimizedLayout({
                   title: "Company",
                   icon: <SettingsSystemDaydreamOutlined />,
                   pattern: "company{/:companyId}*",
+                },
+                {
+                  segment: "category",
+                  title: "Category",
+                  icon: <CategoryOutlinedIcon />,
+                  pattern: "category{/:categoryId}*",
+                },
+                {
+                  segment: "subcategory",
+                  title: "Sub Category",
+                  icon: <AccountTreeOutlinedIcon />,
+                  pattern: "subcategory{/:subcategoryId}*",
+                },
+                {
+                  segment: "state",
+                  title: "State",
+                  icon: <LocationCityIcon />,
+                  pattern: "state{/:stateId}*",
                 },
                 {
                   segment: "make",

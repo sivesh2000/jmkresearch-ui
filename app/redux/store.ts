@@ -4,7 +4,7 @@ import allUserReducer from "./slices/userSlices/allUserSlice";
 import makeReducer from "./slices/makeSlices/ActiveMakesSlice";
 import filterMakesReducer from "./slices/makeSlices/filterMakesSlice";
 import modelFilterReducer from "./slices/modelSlices/modelFilterSlice";
-import stateReducer from "./slices/stateSlices/stateSlice";
+// import stateReducer from "./slices/stateSlices/stateSlice";
 import cityReducer from "./slices/citySlices/citySlice";
 import districtReducer from "./slices/districtSlice";
 import userDataReducer from "./slices/userSlices/UserDataSlice";
@@ -15,6 +15,9 @@ import helpdeskReducer from "./slices/helpdeskSlices/helpdeskSlice";
 import helpDeskMappingReducer from "./slices/helpDeskMappingSlices/helpDeskMappingSlice";
 import allAssignRolesReducer from "./slices/userSlices/allAssignRolesSlice";
 import companyReducer from "./slices/companySlices/ActiveCompaniesSlice";
+import categoryReducer from "./slices/categorySlices/ActiveCategoriesSlice";
+import subCategoryReducer from "./slices/subCategorySlices/ActiveSubCategoriesSlice";
+import stateReducer from "./slices/stateSlices/ActiveStatesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -23,7 +26,7 @@ export const store = configureStore({
     modelData: modelReducer,
     allUsers: allUserReducer,
     modelFilter: modelFilterReducer,
-    stateData: stateReducer,
+    // stateData: stateReducer,
     cityData: cityReducer,
     districtData: districtReducer,
     loggedUserData: userDataReducer,
@@ -34,6 +37,9 @@ export const store = configureStore({
     helpDeskMapping: helpDeskMappingReducer,
     allAssignRolesUserData: allAssignRolesReducer,
     activeCompanies: companyReducer,
+    activeCategories: categoryReducer,
+    activeSubCategories: subCategoryReducer,
+    activeStates: stateReducer,
   },
 });
 
