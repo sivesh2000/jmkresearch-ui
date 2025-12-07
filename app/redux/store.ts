@@ -18,6 +18,7 @@ import companyReducer from "./slices/companySlices/ActiveCompaniesSlice";
 import categoryReducer from "./slices/categorySlices/ActiveCategoriesSlice";
 import subCategoryReducer from "./slices/subCategorySlices/ActiveSubCategoriesSlice";
 import stateReducer from "./slices/stateSlices/ActiveStatesSlice";
+import tenderReducer from './slices/tenderSlice/ActiveTenderSlice';
 
 export const store = configureStore({
   reducer: {
@@ -40,6 +41,7 @@ export const store = configureStore({
     activeCategories: categoryReducer,
     activeSubCategories: subCategoryReducer,
     activeStates: stateReducer,
+    activeTenders: tenderReducer
   },
 });
 
