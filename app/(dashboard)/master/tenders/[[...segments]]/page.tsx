@@ -24,7 +24,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Filter1OutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import "../../../../global.css";
-import { addCompany, editCompany, getAllActiveCompanies, deleteCompany, getAllFilterPlayers } from "@/app/api/companyApi";
+import { addTender, editTender, getAllActiveTenders, deleteTender, getAllFilterPlayers } from "@/app/api/tenderApi";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
@@ -37,7 +37,7 @@ import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
 const Page = memo(function Page() {
   const dispatch = useDispatch();
-  const { activeCompanies, isLoading, error, players } = useSelector((state: RootState) => state.activeCompanies);
+  const { activeTenders, isLoading, error, players } = useSelector((state: RootState) => state.activeTenders);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
@@ -68,66 +68,101 @@ const Page = memo(function Page() {
     { field: "contactInfo.pincode", headerName: "Pincode", flex: 1 },
   ];
 
+
+
   const filterColumns: any[] = [
-    { field: "name", headerName: "Company Name", type: 'textbox' },
-    { field: "playerType", multiple: true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
-    { field: "description", headerName: "Brief Overview", type: 'textbox' },
-    { field: "slug", headerName: "Slug", type: 'textbox' },
-    { field: "website", headerName: "Website", type: 'textbox' },
-    { field: "logoUrl", headerName: "Logo Url", type: 'textbox' },
-    {
-      field: 'contactInfo', headerName: "Contact Information", type: 'title', fields: [
-        { field: "email", headerName: "Email Address", type: 'textbox' },
-        { field: "phone", headerName: "Contact/Phone Number", type: 'textbox' },
-        { field: "address", headerName: "Address", type: 'textbox' },
-        { field: "city", headerName: "City", type: 'textbox' },
-        { field: "state", headerName: "State", type: 'textbox' },
-        { field: "country", headerName: "Country", type: 'textbox' },
-        { field: "pincode", headerName: "Pincode", type: 'textbox' },
-      ]
-    },
-    {
-      field: 'socialLinks', headerName: "Social Links", type: 'title', fields: [
-        { field: "linkedin", headerName: "LinkedIn", type: 'textbox' },
-        { field: "twitter", headerName: "Twitter", type: 'textbox' },
-        { field: "facebook", headerName: "Facebook", type: 'textbox' },
-      ]
-    },
-    {
-      field: 'businessDetails', headerName: "Business Details", type: 'title', fields: [
-        { field: "establishedYear", headerName: "Established Year", type: 'textbox' },
-        { field: "employeeCount", headerName: "Employee Count", type: 'textbox' },
-        { field: "revenue", headerName: "Revenue", type: 'textbox' },
-        { field: "certifications", headerName: "Certifications", type: 'textbox' },
-      ]
-    },
+    { field: "tenderName", headerName: "Tender Name", flex: 1 },
+    { field: "tenderNumber", headerName: "Tender Number", flex: 1 },
+    { field: "slug", headerName: "Slug", flex: 1 },
+    { field: "rfsIssueDate", headerName: "RFS Issue Date", flex: 1 },
+    { field: "bidSubmissionDeadline", headerName: "Bid Submission Deadline", flex: 1 },
+    { field: "technology", headerName: "Technology", flex: 1 },
+    { field: "tenderingAuthority", headerName: "Tendering Authority", flex: 1 },
+    { field: "tenderScope", headerName: "Tender Scope", flex: 1 },
+    { field: "tenderCapacityMW", headerName: "Tender Capacity (MW)", flex: 1 },
+    { field: "allottedCapacityMW", headerName: "Allotted Capacity (MW)", flex: 1 },
+    { field: "ceilingTariffINR", headerName: "Ceiling Tariff (INR)", flex: 1 },
+    { field: "commissioningTimelineMonths", headerName: "Commissioning Timeline (Months)", flex: 1 },
+    { field: "expectedCommissioningDate", headerName: "Expected Commissioning Date", flex: 1 },
+    { field: "tenderStatus", headerName: "Tender Status", flex: 1 },
+    { field: "lowestTariffQuoted", headerName: "Lowest Tariff Quoted", flex: 1 },
+    { field: "storageComponent", headerName: "Storage Component", flex: 1 },
+    { field: "notes", headerName: "Notes", flex: 1 },
+    { field: "winnersDetails", headerName: "Winners Details", flex: 1 },
+    { field: "ppaSigningDate", headerName: "PPA Signing Date", flex: 1 },
+    { field: "location", headerName: "Location", flex: 1 },
+    { field: "resultAnnouncedDate", headerName: "Result Announced Date", flex: 1 },
+
+    // Relationships
+    { field: "companyId", headerName: "Company", flex: 1 },
+    { field: "stateId", headerName: "State", flex: 1 },
+
+    // Documents
+    { field: "tenderDocuments", headerName: "Tender Documents", flex: 1 },
+
+    { field: "isActive", headerName: "Active", flex: 1 },
+    { field: "createdAt", headerName: "Created At", flex: 1 },
+    { field: "updatedAt", headerName: "Updated At", flex: 1 },
+
+    // { field: "name", headerName: "Tender Name", type: 'textbox' },
+    // { field: "playerType", multiple: true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
+    // { field: "description", headerName: "Brief Overview", type: 'textbox' },
+    // { field: "slug", headerName: "Slug", type: 'textbox' },
+    // { field: "website", headerName: "Website", type: 'textbox' },
+    // { field: "logoUrl", headerName: "Logo Url", type: 'textbox' },
+    // {
+    //   field: 'contactInfo', headerName: "Contact Information", type: 'title', fields: [
+    //     { field: "email", headerName: "Email Address", type: 'textbox' },
+    //     { field: "phone", headerName: "Contact/Phone Number", type: 'textbox' },
+    //     { field: "address", headerName: "Address", type: 'textbox' },
+    //     { field: "city", headerName: "City", type: 'textbox' },
+    //     { field: "state", headerName: "State", type: 'textbox' },
+    //     { field: "country", headerName: "Country", type: 'textbox' },
+    //     { field: "pincode", headerName: "Pincode", type: 'textbox' },
+    //   ]
+    // },
+    // {
+    //   field: 'socialLinks', headerName: "Social Links", type: 'title', fields: [
+    //     { field: "linkedin", headerName: "LinkedIn", type: 'textbox' },
+    //     { field: "twitter", headerName: "Twitter", type: 'textbox' },
+    //     { field: "facebook", headerName: "Facebook", type: 'textbox' },
+    //   ]
+    // },
+    // {
+    //   field: 'businessDetails', headerName: "Business Details", type: 'title', fields: [
+    //     { field: "establishedYear", headerName: "Established Year", type: 'textbox' },
+    //     { field: "employeeCount", headerName: "Employee Count", type: 'textbox' },
+    //     { field: "revenue", headerName: "Revenue", type: 'textbox' },
+    //     { field: "certifications", headerName: "Certifications", type: 'textbox' },
+    //   ]
+    // },
   ];
   // socialLinks: { linkedin: "", twitter: "", facebook: "" },
   // businessDetails: { establishedYear: new Date().getFullYear(), employeeCount: "", revenue: "", certifications: [] },
   // tags: [],
   // isActive: true
 
-  const fetcCompanies = useCallback(async () => {
+  const fetcTenders = useCallback(async () => {
     try {
-      getAllActiveCompanies(dispatch)();
+      getAllActiveTenders(dispatch)();
       getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
-      toast.error("Failed to fetch company/filters." + (error as any).response || "");
+      toast.error("Failed to fetch tender/filters." + (error as any).response || "");
     }
   }, [dispatch]);
 
   useEffect(() => {
-    fetcCompanies();
+    fetcTenders();
   }, []);
 
 
   useEffect(() => {
-    // console.log("Active Makes:", activeCompanies);
-  }, [activeCompanies]);
+    // console.log("Active Makes:", activeTenders);
+  }, [activeTenders]);
 
   const [columns, setColumns] = useState<GridColDef[]>([
-    { field: "name", headerName: "Company Name", flex: 1 },
+    { field: "name", headerName: "Tender Name", flex: 1 },
     { field: "description", headerName: "Brief Overview", flex: 1 },
     { field: "playerType", headerName: "Player Type", flex: 1 },
     {
@@ -147,7 +182,7 @@ const Page = memo(function Page() {
   useEffect(() => {
     if (selCol) {
       setColumns([
-        { field: "name", headerName: "Company Name", flex: 1 },
+        { field: "name", headerName: "Tender Name", flex: 1 },
         { field: "description", headerName: "Brief Overview", flex: 1 },
         { field: "playerType", headerName: "Player Type", flex: 1 },
         {
@@ -202,7 +237,7 @@ const Page = memo(function Page() {
   const handleDeleteConfirm = async () => {
     try {
       const deleteId = deleteRow.id;
-      const deleteFunction = deleteCompany(dispatch);
+      const deleteFunction = deleteTender(dispatch);
       await deleteFunction(deleteId);
       toast.success("Make deleted successfully!");
     } catch (err) {
@@ -231,19 +266,19 @@ const Page = memo(function Page() {
   const handleSave = async (data: any) => {
     try {
       if (isEdit) {
-        const editFunction = editCompany(dispatch);
+        const editFunction = editTender(dispatch);
         await editFunction(formData.id!, {
           name: formData.make_name,
           isActive: formData.status,
         });
         toast.success("Make updated successfully!");
       } else {
-        const addFunction = addCompany(dispatch);
+        const addFunction = addTender(dispatch);
         const payload = buildPayload(data);
         const resp = await addFunction(payload);
         console.log("resp", resp);
         setDrawer(false);
-        toast.success("Company created successfully!");
+        toast.success("Tender created successfully!");
       }
       handleModalClose();
     } catch (err) {
@@ -257,7 +292,7 @@ const Page = memo(function Page() {
 
   const handleFilter = (params: any) => {
     console.log("Params", params)
-    getAllActiveCompanies(dispatch, params)();
+    getAllActiveTenders(dispatch, params)();
     setDrawer(false);
   }
 
@@ -278,15 +313,15 @@ const Page = memo(function Page() {
     </Menu>)
   };
 
-  const CompanyModel = () => {
+  const TenderModel = () => {
     return (<Modal open={modalOpen} onClose={handleModalClose}>
       <Box sx={{
         position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" },
         width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 },
         borderRadius: { xs: 0, sm: 2 }, overflow: "auto",
       }}>
-        <Typography variant="h6" component="h2" mb={3}>{isEdit ? "Edit Company" : "Add New Company"}</Typography>
-        <TextField fullWidth variant="standard" label="Company Name" value={formData.make_name} onChange={(e) => handleInputChange("company_name", e.target.value)} margin="normal" />
+        <Typography variant="h6" component="h2" mb={3}>{isEdit ? "Edit Tender" : "Add New Tender"}</Typography>
+        <TextField fullWidth variant="standard" label="Tender Name" value={formData.make_name} onChange={(e) => handleInputChange("tender_name", e.target.value)} margin="normal" />
         <FormControl fullWidth variant="standard" margin="normal">
           <InputLabel>Player Type</InputLabel>
           <Select
@@ -397,7 +432,7 @@ const Page = memo(function Page() {
       <Paper sx={{ height: "auto", width: "100%" }}>
         <Box sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1 }}>
-            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Company Name" margin="normal" />
+            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Tender Name" margin="normal" />
             <Box sx={{ textAlign: "right", pt: 2 }}>
               <IconButton variant="contained" size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }}>
                 <SearchIcon fontSize="small" />
@@ -410,33 +445,33 @@ const Page = memo(function Page() {
           <Box sx={{ textAlign: "right", pt: 3 }}>
             <ColSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
             <PermissionCheck action={OEM_ADD}>
-              <Tooltip title="Add New Company" placement="top">
+              <Tooltip title="Add New Tender" placement="top">
                 <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
                   <AddIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
             </PermissionCheck>
             <PermissionCheck action={OEM_ADD}>
-              <ExportData dataArray={activeCompanies} type={'button'} columns={columns} />
+              <ExportData dataArray={activeTenders} type={'button'} columns={columns} />
             </PermissionCheck>
             <PermissionCheck action={OEM_ADD}>
               <ImportData title="Import Data" />
             </PermissionCheck>
-            <Tooltip title="Filter company data" placement="top">
+            <Tooltip title="Filter tender data" placement="top">
               <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('filter')}>
                 <Filter1OutlinedIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Box>
         </Box>
-        <LazyDataGrid rows={activeCompanies} getRowId={(row: any) => row.id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
+        <LazyDataGrid rows={activeTenders} getRowId={(row: any) => row.id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
       </Paper>
       <MenuComponent />
-      <CompanyModel />
+      <TenderModel />
       <DeleteDialog />
       <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
-      <CommonDrawer title={'Add New Company'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
-      <CommonDrawer title={'Edit Company'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={'Add New Tender'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={'Edit Tender'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Import Data'} isOpen={isDrawer && drawerAction === 'import'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Import" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Export Data'} isOpen={isDrawer && drawerAction === 'export'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Export" buttonCancelLabel="Cancel" />
     </PageContainer>

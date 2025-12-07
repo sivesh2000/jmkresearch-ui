@@ -89,10 +89,10 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
                         </Root>
                     </>)
                 } else if (column.type === 'title') {
-                    return (<>
+                    return (<div key={"section-title-" + idx}>
                         <Typography component="h4" sx={{ mt: '13px', mb: '-6px', color: '#1274b0' }}>{column.headerName}</Typography>
                         {renderInput(column.fields, column.field)}
-                    </>)
+                    </div>)
                 } else {
                     switch (column.type) {
                         case 'textbox':
