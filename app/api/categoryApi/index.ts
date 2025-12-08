@@ -18,7 +18,7 @@ export const getAllActiveCategories = (dispatch: Dispatch) => async () => {
     }
 }
 
-export const addCategory = (dispatch: Dispatch) => async (formData: { name: string; isActive: boolean }) => {
+export const addCategory = (dispatch: Dispatch) => async (formData: { name: string; slug: string; description: string; isActive: boolean }) => {
     try {
         console.log("formdata", formData);
         dispatch(setLoading(true));
@@ -35,7 +35,7 @@ export const addCategory = (dispatch: Dispatch) => async (formData: { name: stri
     }
 }
 
-export const editCategory = (dispatch: Dispatch) => async (id: number, formData: { name: string; isActive: boolean }) => {
+export const editCategory = (dispatch: Dispatch) => async (id: number, formData: { name: string; slug: string; description: string; isActive: boolean }) => {
     try {
         console.log("id:", id, "formdata", formData);
         dispatch(setLoading(true));
