@@ -71,6 +71,7 @@ const Page = memo(function Page() {
   const [formData, setFormData] = useState({
     category_name: "",
     slug: "",
+    description: "",
     status: true,
     id: null,
   });
@@ -84,6 +85,7 @@ const Page = memo(function Page() {
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
   const optionalColumns: GridColDef[] = [
     { field: "slug", headerName: "Slug", flex: 1 },
+    { field: "description", headerName: "Description", flex: 1 },
     { field: "createdAt", headerName: "Created", flex: 1 },
     { field: "updatedAt", headerName: "Updated", flex: 1 },
     {
@@ -237,6 +239,7 @@ const Page = memo(function Page() {
       setFormData({
         category_name: selectedRow.name,
         slug: selectedRow.slug,
+        description: selectedRow.description,
         status: selectedRow.isActive,
         id: selectedRow._id,
       });
@@ -271,15 +274,9 @@ const Page = memo(function Page() {
     setDeleteRow(null);
   };
 
-  const handleAddClick = () => {
-    setFormData({ category_name: "", slug: "",  status: true, id: null });
-    setIsEdit(false);
-    setModalOpen(true);
-  };
-
   const handleModalClose = () => {
     setModalOpen(false);
-    setFormData({ category_name: "", slug: "", status: true, id: null });
+    setFormData({ category_name: "", slug: "", description: "", status: true, id: null });
   };
 
   const handleSave = async (data: any) => {
@@ -288,6 +285,8 @@ const Page = memo(function Page() {
         const editFunction = editCategory(dispatch);
         await editFunction(formData.id!, {
           name: formData.category_name,
+          slug: formData.slug,
+          description: formData.description,
           isActive: formData.status,
         });
         toast.success("Category updated successfully!");
@@ -296,6 +295,8 @@ const Page = memo(function Page() {
         const payload = {
           name: data?.name,
           slug: data?.slug,
+          description: data?.description,
+          parentId: null,
           isActive: true,
         };
         const resp = await addFunction(payload);
@@ -312,12 +313,9 @@ const Page = memo(function Page() {
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleFilter = (params: any) => {
     console.log("Params", params);
+    getAllActiveCategories(dispatch, params)();
     setDrawer(false);
   };
 
@@ -338,60 +336,6 @@ const Page = memo(function Page() {
       </Menu>
     );
   };
-
-  // const CategoryModel = () => {
-  //   return (
-  //     <Modal open={modalOpen} onClose={handleModalClose}>
-  //       <Box
-  //         sx={{
-  //           position: "absolute",
-  //           top: { xs: 0, sm: "50%" },
-  //           left: { xs: 0, sm: "50%" },
-  //           transform: { xs: "none", sm: "translate(-50%, -50%)" },
-  //           width: { xs: "100vw", sm: 400 },
-  //           height: { xs: "100vh", sm: "auto" },
-  //           bgcolor: "background.paper",
-  //           boxShadow: 24,
-  //           p: { xs: 2, sm: 4 },
-  //           borderRadius: { xs: 0, sm: 2 },
-  //           overflow: "auto",
-  //         }}
-  //       >
-  //         <Typography variant="h6" component="h2" mb={3}>
-  //           {isEdit ? "Edit Category" : "Add New Category"}
-  //         </Typography>
-
-  //         <TextField
-  //           fullWidth
-  //           variant="standard"
-  //           label="Category Name"
-  //           value={formData.category_name}
-  //           onChange={(e) => handleInputChange("category_name", e.target.value)}
-  //           margin="normal"
-  //         />
-          
-  //         <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-  //           <Button
-  //             className="button-common button-primary"
-  //             variant="contained"
-  //             onClick={handleSave}
-  //             fullWidth
-  //           >
-  //             Save
-  //           </Button>
-  //           <Button
-  //             className="button-common buttonColor"
-  //             variant="outlined"
-  //             onClick={handleModalClose}
-  //             fullWidth
-  //           >
-  //             Cancel
-  //           </Button>
-  //         </Box>
-  //       </Box>
-  //     </Modal>
-  //   );
-  // };
 
   const DeleteDialog = () => {
     return (
@@ -637,6 +581,7 @@ const Page = memo(function Page() {
         onApply={handleFilter}
         buttonOkLabel="Apply Filter"
         buttonCancelLabel="Cancel"
+         buttonClearLabel="Clear"
       />
       <CommonDrawer
         title={"Add New Category"}

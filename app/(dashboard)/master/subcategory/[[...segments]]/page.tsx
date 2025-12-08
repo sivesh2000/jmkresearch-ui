@@ -48,6 +48,9 @@ import {
   editSubCategory,
   deleteSubCategory,
 } from "@/app/api/subCategoryApi";
+import {
+  getAllActiveCategories,
+} from "@/app/api/categoryApi";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
@@ -62,6 +65,9 @@ const Page = memo(function Page() {
   const dispatch = useDispatch();
   const { activeSubCategories, isLoading, error, players } = useSelector(
     (state: RootState) => state.activeSubCategories
+  );
+  const { activeCategories } = useSelector(
+    (state: RootState) => state.activeCategories
   );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
@@ -116,7 +122,7 @@ const Page = memo(function Page() {
       field: "cat_id",
       headerName: "Categories",
       type: "dropdown",
-      options: [],
+      options: activeCategories || [],
       optionLabelField: "name",
       optionValueField: "id",
     },
@@ -159,7 +165,8 @@ const Page = memo(function Page() {
 
 
   const [columns, setColumns] = useState<GridColDef[]>([
-      { field: "name", headerName: "Category Name", flex: 1 },
+      { field: "name", headerName: "Sub Category Name", flex: 1 },
+      { field: "cat_id", headerName: "Category Name", flex: 1 },
       {
         field: "isActive",
         headerName: "Status",
@@ -196,7 +203,8 @@ const Page = memo(function Page() {
     useEffect(() => {
       if (selCol) {
         setColumns([
-          { field: "name", headerName: "Category Name", flex: 1 },
+          { field: "name", headerName: "Sub Category Name", flex: 1 },
+          { field: "cat_id", headerName: "Category Name", flex: 1 },
           ...selCol,
           {
             field: "isActive",
@@ -283,18 +291,13 @@ const Page = memo(function Page() {
     setDeleteRow(null);
   };
 
-  const handleAddClick = () => {
-    setFormData({ cat_id: "", sub_category_name: "", slug: "", status: true, id: null });
-    setIsEdit(false);
-    setModalOpen(true);
-  };
-
   const handleModalClose = () => {
     setModalOpen(false);
     setFormData({ cat_id: "", sub_category_name: "", slug: "",  status: true, id: null });
   };
 
   const handleSave = async (data: any) => {
+    console.log(data, "HandleSave")
     try {
       if (isEdit) {
         const editFunction = editSubCategory(dispatch);
@@ -307,8 +310,10 @@ const Page = memo(function Page() {
       } else {
         const addFunction = addSubCategory(dispatch);
         const payload = {
-          cat_id: data?.cat_id,
+          parentId: data?.cat_id?.id,
           name: data?.name,
+          slug: data?.slug,
+          description: data?.description,
           isActive: true,
         };
         const resp = await addFunction(payload);

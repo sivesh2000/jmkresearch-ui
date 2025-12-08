@@ -5,7 +5,7 @@ import { Dispatch } from "@reduxjs/toolkit"
 export const getAllActiveSubCategories = (dispatch: Dispatch) => async () => {
     try {
         dispatch(setLoading(true));
-        const response = await axiosInstance.get('subcategories');
+        const response = await axiosInstance.get('categories');
         const subCategories = response?.data?.results || []
         dispatch(setSubCategories(subCategories));
         dispatch(setError(null));
@@ -22,7 +22,7 @@ export const addSubCategory = (dispatch: Dispatch) => async (formData: { name: s
     try {
         console.log("formdata", formData);
         dispatch(setLoading(true));
-        const response = await axiosInstance.post('subcategories', formData);
+        const response = await axiosInstance.post('categories', formData);
         dispatch(setError(null));
         // Refresh the sub categories list after adding
         await getAllActiveSubCategories(dispatch)();
@@ -39,7 +39,7 @@ export const editSubCategory = (dispatch: Dispatch) => async (id: number, formDa
     try {
         console.log("id:", id, "formdata", formData);
         dispatch(setLoading(true));
-        const response = await axiosInstance.put(`subcategories/${id}`, formData);
+        const response = await axiosInstance.put(`categories/${id}`, formData);
         dispatch(setError(null));
         // Refresh the sub categories list after edit
         await getAllActiveSubCategories(dispatch)();
@@ -55,7 +55,7 @@ export const editSubCategory = (dispatch: Dispatch) => async (id: number, formDa
 export const deleteSubCategory = (dispatch: Dispatch) => async (id: number) => {
     try {
         dispatch(setLoading(true));
-        const response = await axiosInstance.delete(`subcategories/${id}`);
+        const response = await axiosInstance.delete(`categories/${id}`);
         dispatch(setError(null));
         // Refresh the sub categories list after deletion
         await getAllActiveSubCategories(dispatch)();
