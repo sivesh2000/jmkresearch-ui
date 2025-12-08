@@ -18,6 +18,10 @@ import type { Navigation } from "@toolpad/core/AppProvider";
 import { signIn, signOut } from "next-auth/react";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import TwoWheelerOutlinedIcon from "@mui/icons-material/TwoWheelerOutlined";
+import SettingsSystemDaydreamOutlined from "@mui/icons-material/SettingsSystemDaydreamOutlined";
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
@@ -26,6 +30,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import ContactSupportOutlinedIcon from "@mui/icons-material/ContactSupportOutlined";
 import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import LocationCityIcon from '@mui/icons-material/LocationCity';
 import "../global.css";
 
 interface OptimizedLayoutProps {
@@ -35,7 +40,7 @@ interface OptimizedLayoutProps {
 }
 
 const getBranding = (session: any) => ({
-  title: "NYOM",
+  title: '',
   logo: (
     <div
       style={{
@@ -45,7 +50,7 @@ const getBranding = (session: any) => ({
         gap: 12,
       }}
     >
-      <img src="/logo.png" alt="Nyom Logo" style={{ height: 40 }} />
+      <img src="/logo.png" alt="JMK Logo" style={{ height: 40 }} />
     </div>
   ),
 });
@@ -104,24 +109,59 @@ export default function OptimizedLayout({
       },
       ...(session?.user?.userType === "super_admin"
         ? [
-            {
+            { 
               segment: "master",
               title: "Master Data",
               icon: <StarBorderOutlinedIcon />,
               //permission: MASTER_DATA_VIEW,
               children: [
                 {
-                  segment: "make",
-                  title: "Make",
-                  icon: <TwoWheelerOutlinedIcon />,
-                  pattern: "make{/:makeId}*",
+                  segment: "company",
+                  title: "Company",
+                  icon: <SettingsSystemDaydreamOutlined />,
+                  pattern: "company{/:companyId}*",
                 },
                 {
-                  segment: "model",
-                  title: "Model",
-                  icon: <TwoWheelerOutlinedIcon />,
-                  pattern: "model{/:modelId}*",
-                  permission: MODEL_VIEW,
+                  segment: "category",
+                  title: "Category",
+                  icon: <CategoryOutlinedIcon />,
+                  pattern: "category{/:categoryId}*",
+                },
+                {
+                  segment: "subcategory",
+                  title: "Sub Category",
+                  icon: <AccountTreeOutlinedIcon />,
+                  pattern: "subcategory{/:subcategoryId}*",
+                },
+                {
+                  segment: "state",
+                  title: "State",
+                  icon: <LocationCityIcon />,
+                  pattern: "state{/:stateId}*",
+                },
+                {
+                  segment: "tenders",
+                  title: "Tender",
+                  icon: <LocationCityIcon />,
+                  pattern: "tenders{/:tenderId}*",
+                },
+                {
+                  segment: "project",
+                  title: "Project",
+                  icon: <LocationCityIcon />,
+                  pattern: "project{/:projectId}*",
+                },
+                {
+                  segment: "document",
+                  title: "Document",
+                  icon: <LocationCityIcon />,
+                  pattern: "document{/:DocumentId}*",
+                },
+                {
+                  segment: "chart",
+                  title: "Chart",
+                  icon: <LocationCityIcon />,
+                  pattern: "chart{/:chartId}*",
                 },
                 {
                   segment: "helpdeskmapping",
