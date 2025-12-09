@@ -20,7 +20,7 @@ export const getAllActiveStates = (dispatch: Dispatch) => async () => {
     try {
         dispatch(setLoading(true));
         const response = await axiosInstance.get('states');
-        const states = response?.data?.results || []
+        const states = response?.data || []
         dispatch(setStates(states));
         dispatch(setError(null));
     } catch (error) {
@@ -32,7 +32,7 @@ export const getAllActiveStates = (dispatch: Dispatch) => async () => {
     }
 }
 
-export const addState = (dispatch: Dispatch) => async (formData: { name: string; isActive: boolean }) => {
+export const addState = (dispatch: Dispatch) => async (formData: { name: string; code: string; isActive: boolean }) => {
     try {
         console.log("formdata", formData);
         dispatch(setLoading(true));
@@ -49,7 +49,7 @@ export const addState = (dispatch: Dispatch) => async (formData: { name: string;
     }
 }
 
-export const editState = (dispatch: Dispatch) => async (id: number, formData: { name: string; isActive: boolean }) => {
+export const editState = (dispatch: Dispatch) => async (id: number, formData: { name: string; code: string; isActive: boolean }) => {
     try {
         console.log("id:", id, "formdata", formData);
         dispatch(setLoading(true));

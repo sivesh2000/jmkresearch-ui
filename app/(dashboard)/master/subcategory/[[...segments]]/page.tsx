@@ -5,31 +5,7 @@ import LazyDataGrid from "../../../../components/LazyDataGrid";
 import CommonDrawer from "../../../../components/CommonDrawer";
 import Paper from "@mui/material/Paper";
 import { PageContainer } from "@toolpad/core";
-import {
-  Box,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  Modal,
-  TextField,
-  Typography,
-  FormControl,
-  Switch,
-  FormControlLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Chip,
-  InputLabel,
-  Select,
-  ListItemText,
-  Checkbox,
-  List,
-  ListItem,
-  ListItemButton,
+import { Box, Button, IconButton, Menu, MenuItem, Modal, TextField, Typography, FormControl, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Chip, InputLabel, Select, ListItemText, Checkbox, List, ListItem, ListItemButton,
   ListItemIcon,
   Tooltip,
 } from "@mui/material";
@@ -166,7 +142,7 @@ const Page = memo(function Page() {
 
   const [columns, setColumns] = useState<GridColDef[]>([
       { field: "name", headerName: "Sub Category Name", flex: 1 },
-      { field: "cat_id", headerName: "Category Name", flex: 1 },
+      { field: "subCatName", headerName: "Category Name", flex: 1 },
       {
         field: "isActive",
         headerName: "Status",
@@ -204,7 +180,7 @@ const Page = memo(function Page() {
       if (selCol) {
         setColumns([
           { field: "name", headerName: "Sub Category Name", flex: 1 },
-          { field: "cat_id", headerName: "Category Name", flex: 1 },
+          { field: "subCatName", headerName: "Category Name", flex: 1 },
           ...selCol,
           {
             field: "isActive",
@@ -356,25 +332,6 @@ const Page = memo(function Page() {
       </Menu>
     );
   };
-
-  // const SubCategoryModel = () => {
-  //   return (<Modal open={modalOpen} onClose={handleModalClose}>
-  //     <Box sx={{
-  //       position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" },
-  //       width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 },
-  //       borderRadius: { xs: 0, sm: 2 }, overflow: "auto",
-  //     }}
-  //     >
-  //       <Typography variant="h6" component="h2" mb={3}>{isEdit ? "Edit Sub Category" : "Add New Sub Category"}</Typography>
-
-  //       <TextField fullWidth variant="standard" label="Sub Category Name" value={formData.sub_category_name} onChange={(e) => handleInputChange("sub_category_name", e.target.value)} margin="normal" />
-  //       <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-  //         <Button className="button-common button-primary" variant="contained" onClick={handleSave} fullWidth>Save</Button>
-  //         <Button className="button-common buttonColor" variant="outlined" onClick={handleModalClose} fullWidth>Cancel</Button>
-  //       </Box>
-  //     </Box>
-  //   </Modal>)
-  // }
 
   const DeleteDialog = () => {
     return (
@@ -540,12 +497,6 @@ const Page = memo(function Page() {
               placeholder="Sub Category Name"
               margin="normal"
             />
-            <TextField
-              sx={{ width: "300px" }}
-              variant="standard"
-              placeholder="Category"
-              margin="normal"
-            />
             <Box sx={{ textAlign: "right", pt: 2 }}>
               <IconButton
                 variant="contained"
@@ -614,7 +565,6 @@ const Page = memo(function Page() {
         />
       </Paper>
       <MenuComponent />
-      {/* <SubCategoryModel /> */}
       <DeleteDialog />
       <CommonDrawer
         title={"Filter Options"}
