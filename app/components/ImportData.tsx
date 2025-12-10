@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback, memo, use } from "react";
-import { Box, Button, IconButton, Typography, Drawer, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Typography, Drawer, Tooltip, Chip, Stack } from "@mui/material";
 import UploadFileIcon from '@mui/icons-material/Upload';
 import CloseIcon from "@mui/icons-material/Close";
 import { useDropzone } from "react-dropzone";
@@ -13,11 +13,16 @@ const ImportData = memo(function ImportData({ title = '' }: ImportDataProps) {
     const [localData, setLocalData] = useState<any>({});
     const [formKey, setFormKey] = useState<string>('frm-0');
     const [isOpen, setOpen] = useState(false);
+    const [files, setFiles] = useState<any[]>([]);
     const { getRootProps, getInputProps } = useDropzone({
-        onDrop: (files) => console.log(files)
+        onDrop: (files) => setFiles(files)
     });
     const onSubmit = (e: React.FormEvent) => { e.preventDefault(); }
 
+    const handleDelete = (event: any, index: number) => {
+        const new1 = files.filter(x=> x.name !== event.name) || [];
+        setFiles(new1);
+    }
 
     const renderDrawer = () => {
         return (<>
@@ -44,8 +49,14 @@ const ImportData = memo(function ImportData({ title = '' }: ImportDataProps) {
                             <p>Drag & drop files here, or click to upload</p>
                         </div>
 
+                        <Box sx={{ display: "flex", gap: 1, mt: 2, bgcolor: "background.paper", pt: 2, overflow:'auto'}}>
+                            <Stack direction="row" spacing={1}>
+                                {files.map((x, i) => <Chip key={'file' + i} label={x.name} onDelete={() => handleDelete(x, i)} />)}
+                            </Stack>
+                        </Box>
+
                         <Box sx={{ display: "flex", gap: 1, mt: 2, bgcolor: "background.paper", pt: 2, }}>
-                            <Button type="submit" variant="contained" className="button-primary button-common" fullWidth>Import</Button>
+                            <Button disabled={files.length===0} type="submit" variant="contained" className="button-primary button-common" fullWidth>Import</Button>
                             <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={() => setOpen(false)}>Cancel</Button>
                         </Box>
                     </form>

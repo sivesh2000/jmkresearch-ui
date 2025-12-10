@@ -9,7 +9,7 @@ export const getAllActiveCompanies = (dispatch: Dispatch, filters: any) => async
         const queryParam = parseQueryParams(filters,'');
         const url = 'companies?' + queryParam;
         const response = await axiosInstance.get(url);
-        console.log(">>>",response)
+        // console.log(">>>",response)
         const companies = response?.data?.results || []
         dispatch(setCompanies(companies));
         dispatch(setError(null));
