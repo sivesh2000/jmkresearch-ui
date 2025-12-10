@@ -44,7 +44,7 @@ const Page = memo(function Page() {
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ state_name: "", status: true, id: null });
+  const [formData, setFormData] = useState({ state_name: "", code: "", status: true, id: null });
   const [isEdit, setIsEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
@@ -79,7 +79,7 @@ const Page = memo(function Page() {
 
   const filterColumns: any[] = [
     { field: "name", headerName: "State Name", type: 'textbox' },
-    // { field: "description", headerName: "Brief Overview", type: 'textbox' },
+    { field: "code", headerName: "State Code", type: 'textbox' },
     // { field: "status", headerName: "Status", type: 'switch' },
     // { field: "playerType",multiple:true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
     { field: "isActive", headerName: "Status", type: 'dropdown', options: [{ key: "Active", value: true }, { key: "In-Active", value: false }], optionLabelField: 'key', optionValueField: 'value' },
@@ -101,11 +101,12 @@ const Page = memo(function Page() {
 
 
   useEffect(() => {
-    // console.log("Active Makes:", activeStates);
+    console.log("Active Makes:", activeStates);
   }, [activeStates]);
 
   const [columns, setColumns] = useState<GridColDef[]>([
-    { field: "name", headerName: "State", flex: 1 },
+    { field: "name", headerName: "State Name", flex: 1 },
+    { field: "code", headerName: "State Code", flex: 1 },
     {
       field: "isActive",
       headerName: "Status",
@@ -142,7 +143,8 @@ const Page = memo(function Page() {
   useEffect(() => {
     if (selCol) {
       setColumns([
-        { field: "name", headerName: "State", flex: 1 },
+        { field: "name", headerName: "State Name", flex: 1 },
+        { field: "code", headerName: "State Code", flex: 1 },
         ...selCol,
         {
           field: "isActive",
@@ -192,6 +194,7 @@ const Page = memo(function Page() {
     if (task === "Edit") {
       setFormData({
         state_name: selectedRow.name,
+        code: selectedRow.code,
         status: selectedRow.isActive,
         id: selectedRow._id,
       });
@@ -224,15 +227,9 @@ const Page = memo(function Page() {
     setDeleteRow(null);
   };
 
-  const handleAddClick = () => {
-    setFormData({ state_name: "", status: true, id: null });
-    setIsEdit(false);
-    setModalOpen(true);
-  };
-
   const handleModalClose = () => {
     setModalOpen(false);
-    setFormData({ state_name: "", status: true, id: null });
+    setFormData({ state_name: "", code: "", status: true, id: null });
   };
 
   const handleSave = async (data: any) => {
@@ -241,6 +238,7 @@ const Page = memo(function Page() {
         const editFunction = editState(dispatch);
         await editFunction(formData.id!, {
           name: formData.state_name,
+          code: formData.code,
           isActive: formData.status,
         });
         toast.success("State updated successfully!");
@@ -248,6 +246,7 @@ const Page = memo(function Page() {
         const addFunction = addState(dispatch);
         const payload = {
           name: data?.name,
+          code: data?.code,
           isActive: true
         }
         const resp =await addFunction(payload);
@@ -286,25 +285,6 @@ const Page = memo(function Page() {
       {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
     </Menu>)
   };
-
-  const StateModel = () => {
-    return (<Modal open={modalOpen} onClose={handleModalClose}>
-      <Box sx={{
-        position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" },
-        width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 },
-        borderRadius: { xs: 0, sm: 2 }, overflow: "auto",
-      }}
-      >
-        <Typography variant="h6" component="h2" mb={3}>{isEdit ? "Edit State" : "Add New State"}</Typography>
-
-        <TextField fullWidth variant="standard" label="State Name" value={formData.state_name} onChange={(e) => handleInputChange("state_name", e.target.value)} margin="normal" />
-        <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-          <Button className="button-common button-primary" variant="contained" onClick={handleSave} fullWidth>Save</Button>
-          <Button className="button-common buttonColor" variant="outlined" onClick={handleModalClose} fullWidth>Cancel</Button>
-        </Box>
-      </Box>
-    </Modal>)
-  }
 
   const DeleteDialog = () => {
     return (<Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
@@ -448,11 +428,7 @@ const Page = memo(function Page() {
             </Box>
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
-            <ColSelector
-                          options={optionalColumns}
-                          selCol={selCol}
-                          setSelCol={setSelCol}
-                        />
+            <ColSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
             <PermissionCheck action={OEM_ADD}>
               <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
                 <AddIcon fontSize="small" />
@@ -469,10 +445,9 @@ const Page = memo(function Page() {
             </IconButton>
           </Box>
         </Box>
-        <LazyDataGrid rows={activeStates} getRowId={(row: any) => row.id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
+        <LazyDataGrid rows={activeStates} getRowId={(row: any) => row._id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
       </Paper>
       <MenuComponent />
-      <StateModel />
       <DeleteDialog />
       <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Add New State'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />

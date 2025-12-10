@@ -10,7 +10,8 @@ export const getAllActiveCategories = (dispatch: Dispatch, filters: any) => asyn
         const url = 'categories?' + queryParam;
         const response = await axiosInstance.get(url);
         const categories = response?.data?.results || []
-        dispatch(setCategories(categories));
+        const filterParentCategories = categories.filter((category: any) => category.parentId === null);
+        dispatch(setCategories(filterParentCategories));
         dispatch(setError(null));
     } catch (error) {
         console.error('Error fetching categories:', error);
