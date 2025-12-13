@@ -66,7 +66,7 @@ const ImportData = memo(function ImportData({ title = '' }: ImportDataProps) {
 
                         <Box sx={{ display: "flex", gap: 1, mt: 2, bgcolor: "background.paper", pt: 2, }}>
                             <Button type="submit" variant="contained" className="button-primary button-common" fullWidth>Import</Button>
-                            <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={() => setOpen(false)}>Cancel</Button>
+                            <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={() => {setFiles([]);setOpen(false)}}>Cancel</Button>
                         </Box>
                     </form>
                 </Box>

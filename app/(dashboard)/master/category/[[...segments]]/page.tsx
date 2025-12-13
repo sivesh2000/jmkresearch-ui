@@ -5,7 +5,8 @@ import LazyDataGrid from "../../../../components/LazyDataGrid";
 import CommonDrawer from "../../../../components/CommonDrawer";
 import Paper from "@mui/material/Paper";
 import { PageContainer } from "@toolpad/core";
-import { Box, Button, IconButton, Menu, MenuItem, Modal, TextField, Typography, FormControl, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Chip, InputLabel, Select, ListItemText, Checkbox, List, ListItem, ListItemButton, ListItemIcon, Tooltip,
+import {
+  Box, Button, IconButton, Menu, MenuItem, Modal, TextField, Typography, FormControl, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Chip, InputLabel, Select, ListItemText, Checkbox, List, ListItem, ListItemButton, ListItemIcon, Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -23,11 +24,12 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
 import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
+import { buildPayload, getCategoryPayload, getFilterPayload } from '../helper';
 import { options, set } from "jodit/esm/core/helpers";
 // import { buildPayload } from '../helper';
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
-
+import ColumnSelector from "@/app/components/ColumnSelector";
 const Page = memo(function Page() {
   const dispatch = useDispatch();
   const { activeCategories, isLoading, error, players } = useSelector(
@@ -41,29 +43,32 @@ const Page = memo(function Page() {
   const [isEdit, setIsEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
-  const [drawerAction, setDrawerAction] = useState<"filter" | "add" | "edit" | "import" | "export">("filter");
+  const [drawerAction, setDrawerAction] = useState<"filter" | "add" | "edit" | "view" | "import" | "export">("filter");
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
+  const [filterColumns, setFilterColumns] = useState<any[]>();
+  const [editableColumns, setEditableColumns] = useState([]);
+  const [editRow, setEditRow] = useState<any>();
   const optionalColumns: GridColDef[] = [
     { field: "slug", headerName: "Slug", flex: 1 },
+    { field: "icon", headerName: "Icon", flex: 1 },
+    { field: "color", headerName: "Color", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
     { field: "createdAt", headerName: "Created", flex: 1 },
     { field: "updatedAt", headerName: "Updated", flex: 1 },
-    { field: "isVerified", headerName: "Verification", flex: 1, renderCell: (params: any) => params.value ? ( <Chip label="Active" color="success" size="small" variant="outlined" /> ) : ( <Chip label="Inactive" size="small" color="default" variant="outlined" /> ), },
+    { field: "isVerified", headerName: "Verification", flex: 1, renderCell: (params: any) => params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />), },
   ];
 
-  const filterColumns: any[] = [
-    { field: "name", headerName: "Category Name", type: "textbox" },
-    { field: "slug", headerName: "Slug", type: "textbox" },
-    // { field: "description", headerName: "Brief Overview", type: 'textbox' },
-    // { field: "status", headerName: "Status", type: 'switch' },
-    // { field: "playerType",multiple:true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
-    { field: "isActive", headerName: "Status", type: "dropdown", options: [{ key: "Active", value: true }, { key: "In-Active", value: false },], optionLabelField: "key", optionValueField: "value", },
-  ];
+  useEffect(() => {
+    if (activeCategories) {
+      setFilterColumns(getFilterPayload(players || []));
+      setEditableColumns(getCategoryPayload(players || []));
+    }
+  }, [activeCategories]);
 
   const fetchCategories = useCallback(async () => {
     try {
-      getAllActiveCategories(dispatch)();
+      getAllActiveCategories(dispatch, {})();
       // getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
@@ -81,26 +86,18 @@ const Page = memo(function Page() {
     // console.log("Active Makes:", activeCategories);
   }, [activeCategories]);
 
-  const [columns, setColumns] = useState<GridColDef[]>([
-    { field: "name", headerName: "Category Name", flex: 1 },
-    { field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) => params.value ? ( <Chip label="Active" color="success" size="small" variant="outlined" /> ) : ( <Chip label="Inactive" size="small" color="default" variant="outlined" /> ),
-    },
-    { field: "actions", headerName: "Actions", width: 100, renderCell: (params) => (
-        <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
-          <MoreVertIcon color="action" />
-        </IconButton>
-      ),
-    },
-  ]);
+  const [columns, setColumns] = useState<GridColDef[]>([]);
 
   useEffect(() => {
     if (selCol) {
       setColumns([
         { field: "name", headerName: "Category Name", flex: 1 },
         ...selCol,
-        { field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) => params.value ? ( <Chip label="Active" color="success" size="small" variant="outlined" /> ) : ( <Chip label="Inactive" size="small" color="default" variant="outlined" /> ),
+        {
+          field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) => params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
         },
-        { field: "actions", headerName: "Actions", width: 100, renderCell: (params) => (
+        {
+          field: "actions", headerName: "Actions", width: 100, renderCell: (params) => (
             <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
               <MoreVertIcon color="action" />
             </IconButton>
@@ -123,28 +120,29 @@ const Page = memo(function Page() {
   };
 
   const handleAction = (task: string) => {
+    console.log("Task", selectedRow)
     if (task === "Edit") {
-      setFormData({
-        category_name: selectedRow.name,
-        slug: selectedRow.slug,
-        description: selectedRow.description,
-        status: selectedRow.isActive,
-        id: selectedRow._id,
-      });
+      setEditRow(selectedRow);
+      setDrawerAction('edit');
+      setDrawer(true);
       setIsEdit(true);
-      setModalOpen(true);
     } else if (task === "Delete") {
       setDeleteRow(selectedRow);
       setDeleteDialogOpen(true);
+    } else if (task === "View") {
+      setEditRow(selectedRow);
+      setDrawerAction('view');
+      setDrawer(true);
     } else {
       console.log(`${task} clicked for:`, selectedRow);
+
     }
     handleCloseMenu();
   };
 
   const handleDeleteConfirm = async () => {
     try {
-      const deleteId = deleteRow._id;
+      const deleteId = deleteRow.id;
       const deleteFunction = deleteCategory(dispatch);
       await deleteFunction(deleteId);
       toast.success("Category deleted successfully!");
@@ -171,22 +169,12 @@ const Page = memo(function Page() {
     try {
       if (isEdit) {
         const editFunction = editCategory(dispatch);
-        await editFunction(formData.id!, {
-          name: formData.category_name,
-          slug: formData.slug,
-          description: formData.description,
-          isActive: formData.status,
-        });
+        const payload = buildPayload(data);
+        await editFunction(data.id!, payload);
         toast.success("Category updated successfully!");
       } else {
         const addFunction = addCategory(dispatch);
-        const payload = {
-          name: data?.name,
-          slug: data?.slug,
-          description: data?.description,
-          parentId: null,
-          isActive: true,
-        };
+        const payload = buildPayload(data);
         const resp = await addFunction(payload);
         console.log("Response", resp);
         setDrawer(false);
@@ -196,7 +184,7 @@ const Page = memo(function Page() {
     } catch (err) {
       toast.error(
         "Operation failed. Please try again." +
-          (err as any).response.data.message || ""
+        (err as any).response.data.message || ""
       );
     }
   };
@@ -212,13 +200,13 @@ const Page = memo(function Page() {
       <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
         {/* <MenuItem onClick={() => handleAction('View')}>View</MenuItem> */}
         <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}> View</MenuItem>
+          <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
         </PermissionCheck>
         <PermissionCheck action={OEM_EDIT}>
           <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
         </PermissionCheck>
         <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}>Delete</MenuItem>
+          <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
         </PermissionCheck>
         {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
       </Menu>
@@ -298,7 +286,7 @@ const Page = memo(function Page() {
             </List>
 
             <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-              <Button className="button-common button-primary" variant="contained" fullWidth onClick={() => {console.log("Selected", checked); setSelCol(checked); }}>
+              <Button className="button-common button-primary" variant="contained" fullWidth onClick={() => { console.log("Selected", checked); setSelCol(checked); }}>
                 OK
               </Button>
               <Button className="button-common buttonColor" variant="outlined" fullWidth onClick={() => setViewCols(false)}>
@@ -330,7 +318,7 @@ const Page = memo(function Page() {
             {/* <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
               <SettingsIcon fontSize="small" />
             </IconButton> */}
-            <ColSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
+            <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
             <PermissionCheck action={OEM_ADD}>
               <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
                 <AddIcon fontSize="small" />
@@ -352,9 +340,10 @@ const Page = memo(function Page() {
       <MenuComponent />
       {/* <CategoryModel /> */}
       <DeleteDialog />
+      <CommonDrawer title={"Category Details"} isOpen={isDrawer && drawerAction === "view"} setOpen={setDrawer} defaultValue={editRow} />
       <CommonDrawer title={"Filter Options"} isOpen={isDrawer && drawerAction === "filter"} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
-      <CommonDrawer title={"Add New Category"} isOpen={isDrawer && drawerAction === "add"} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
-      <CommonDrawer title={"Edit Category"} isOpen={isDrawer && drawerAction === "edit"} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={"Add New Category"} isOpen={isDrawer && drawerAction === "add"} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={"Edit Category"} isOpen={isDrawer && drawerAction === "edit"} setOpen={setDrawer} columns={editableColumns} defaultValue={editRow} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
       <CommonDrawer title={"Import Data"} isOpen={isDrawer && drawerAction === "import"} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Import" buttonCancelLabel="Cancel" />
       <CommonDrawer title={"Export Data"} isOpen={isDrawer && drawerAction === "export"} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Export" buttonCancelLabel="Cancel" />
     </PageContainer>

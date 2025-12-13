@@ -24,7 +24,9 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Filter1OutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import "../../../../global.css";
-import { addTender, editTender, getAllActiveTenders, deleteTender, getAllFilterPlayers } from "@/app/api/tenderApi";
+import { addTender, editTender, getAllActiveTenders, deleteTender } from "@/app/api/tenderApi";
+import { getAllActiveCompanies, getAllFilterPlayers } from "@/app/api/companyApi";
+import { getAllActiveStates } from "@/app/api/stateApi";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
@@ -32,12 +34,16 @@ import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
 import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { parseQueryParams } from '../../../../utils/functions';
-import { buildPayload } from '../helper';
+import { buildPayload, getFilterPayload, getTenderPayload } from '../helper';
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
+import ColumnSelector from "@/app/components/ColumnSelector";
 const Page = memo(function Page() {
   const dispatch = useDispatch();
   const { activeTenders, isLoading, error, players } = useSelector((state: RootState) => state.activeTenders);
+  const { activeCompanies } = useSelector((state: RootState) => state.activeCompanies);
+  const { activeStates } = useSelector((state: RootState) => state.activeStates);
+  const states = useSelector((state: RootState) => state);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
@@ -46,105 +52,54 @@ const Page = memo(function Page() {
   const [isEdit, setIsEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
+  const [editableColumns, setEditableColumns] = useState([]);
   const [drawerAction, setDrawerAction] = useState<'filter' | 'add' | 'edit' | 'import' | 'export'>('filter');
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
   const optionalColumns: GridColDef[] = [
-    { field: "website", headerName: "Website", flex: 1 },
-    { field: "slug", headerName: "Slug", flex: 1 },
-    { field: "createdAt", headerName: "Created", flex: 1 },
-    { field: "updatedAt", headerName: "Updated", flex: 1 },
+    { field: 'tenderName', headerName: 'Tender Name', flex: 1 },
+    { field: 'tenderNumber', headerName: 'Tender Number', flex: 1 },
+    { field: 'slug', headerName: 'Slug', flex: 1 },
+    { field: 'rfsIssueDate', headerName: 'RFS Issue Date', flex: 1 },
+    { field: 'bidSubmissionDeadline', headerName: 'BID Submission Deadline', flex: 1 },
+    { field: 'technology', headerName: 'Technology', flex: 1 },
+    { field: 'tenderingAuthority', headerName: 'Tender Ingauthority', flex: 1 },
+    { field: 'tenderScope', headerName: 'Tender Scope', flex: 1 },
+    { field: 'tenderCapacityMW', headerName: 'Tender Capacity MW', flex: 1 },
+    { field: 'allottedCapacityMW', headerName: 'Allotted Capacity MW', flex: 1 },
+    { field: 'ceilingTariffINR', headerName: 'Ceiling Tariff INR', flex: 1 },
+    { field: 'commissioningTimelineMonths', headerName: 'Commissioning Timeline Months', flex: 1 },
+    { field: 'expectedCommissioningDate', headerName: 'Expected Commissioning Date', flex: 1 },
+    { field: 'tenderStatus', headerName: 'Tender Status', flex: 1 },
+    { field: 'lowestTariffQuoted', headerName: 'Lowest Tariff Quoted', flex: 1 },
+    { field: 'storageComponent', headerName: 'Storage Component', flex: 1 },
+    { field: 'notes', headerName: 'Notes', flex: 1 },
+    { field: 'winnersDetails', headerName: 'Winners Details', flex: 1 },
+    { field: 'ppaSigningDate', headerName: 'PPA Signing Date', flex: 1 },
+    { field: 'location', headerName: 'Location', flex: 1 },
+    { field: 'resultAnnouncedDate', headerName: 'Result Announced Date', flex: 1 },
+    { field: 'companyId', headerName: 'Company ID', flex: 1 },
+    { field: 'stateId', headerName: 'State ID', flex: 1 },
     {
-      field: "isVerified", headerName: "Verification", flex: 1, renderCell: (params: any) =>
+      field: 'isActive', headerName: 'Active', flex: 1, renderCell: (params: any) =>
         params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />
         ) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
     },
-    { field: "contactInfo.country", headerName: "Country", flex: 1 },
-    { field: "contactInfo.email", headerName: "Email", flex: 1 },
-    { field: "contactInfo.phone", headerName: "Phone", flex: 1 },
-    { field: "contactInfo.address", headerName: "Address", flex: 1 },
-    { field: "contactInfo.city", headerName: "City", flex: 1 },
-    { field: "contactInfo.state", headerName: "State", flex: 1 },
-    { field: "contactInfo.pincode", headerName: "Pincode", flex: 1 },
+    { field: 'createdAt', headerName: 'Created', flex: 1 },
+    { field: 'updatedAt', headerName: 'Updated', flex: 1 },
   ];
-
-
-
-  const filterColumns: any[] = [
-    { field: "tenderName", headerName: "Tender Name", flex: 1 },
-    { field: "tenderNumber", headerName: "Tender Number", flex: 1 },
-    { field: "slug", headerName: "Slug", flex: 1 },
-    { field: "rfsIssueDate", headerName: "RFS Issue Date", flex: 1 },
-    { field: "bidSubmissionDeadline", headerName: "Bid Submission Deadline", flex: 1 },
-    { field: "technology", headerName: "Technology", flex: 1 },
-    { field: "tenderingAuthority", headerName: "Tendering Authority", flex: 1 },
-    { field: "tenderScope", headerName: "Tender Scope", flex: 1 },
-    { field: "tenderCapacityMW", headerName: "Tender Capacity (MW)", flex: 1 },
-    { field: "allottedCapacityMW", headerName: "Allotted Capacity (MW)", flex: 1 },
-    { field: "ceilingTariffINR", headerName: "Ceiling Tariff (INR)", flex: 1 },
-    { field: "commissioningTimelineMonths", headerName: "Commissioning Timeline (Months)", flex: 1 },
-    { field: "expectedCommissioningDate", headerName: "Expected Commissioning Date", flex: 1 },
-    { field: "tenderStatus", headerName: "Tender Status", flex: 1 },
-    { field: "lowestTariffQuoted", headerName: "Lowest Tariff Quoted", flex: 1 },
-    { field: "storageComponent", headerName: "Storage Component", flex: 1 },
-    { field: "notes", headerName: "Notes", flex: 1 },
-    { field: "winnersDetails", headerName: "Winners Details", flex: 1 },
-    { field: "ppaSigningDate", headerName: "PPA Signing Date", flex: 1 },
-    { field: "location", headerName: "Location", flex: 1 },
-    { field: "resultAnnouncedDate", headerName: "Result Announced Date", flex: 1 },
-
-    // Relationships
-    { field: "companyId", headerName: "Company", flex: 1 },
-    { field: "stateId", headerName: "State", flex: 1 },
-
-    // Documents
-    { field: "tenderDocuments", headerName: "Tender Documents", flex: 1 },
-
-    { field: "isActive", headerName: "Active", flex: 1 },
-    { field: "createdAt", headerName: "Created At", flex: 1 },
-    { field: "updatedAt", headerName: "Updated At", flex: 1 },
-
-    // { field: "name", headerName: "Tender Name", type: 'textbox' },
-    // { field: "playerType", multiple: true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
-    // { field: "description", headerName: "Brief Overview", type: 'textbox' },
-    // { field: "slug", headerName: "Slug", type: 'textbox' },
-    // { field: "website", headerName: "Website", type: 'textbox' },
-    // { field: "logoUrl", headerName: "Logo Url", type: 'textbox' },
-    // {
-    //   field: 'contactInfo', headerName: "Contact Information", type: 'title', fields: [
-    //     { field: "email", headerName: "Email Address", type: 'textbox' },
-    //     { field: "phone", headerName: "Contact/Phone Number", type: 'textbox' },
-    //     { field: "address", headerName: "Address", type: 'textbox' },
-    //     { field: "city", headerName: "City", type: 'textbox' },
-    //     { field: "state", headerName: "State", type: 'textbox' },
-    //     { field: "country", headerName: "Country", type: 'textbox' },
-    //     { field: "pincode", headerName: "Pincode", type: 'textbox' },
-    //   ]
-    // },
-    // {
-    //   field: 'socialLinks', headerName: "Social Links", type: 'title', fields: [
-    //     { field: "linkedin", headerName: "LinkedIn", type: 'textbox' },
-    //     { field: "twitter", headerName: "Twitter", type: 'textbox' },
-    //     { field: "facebook", headerName: "Facebook", type: 'textbox' },
-    //   ]
-    // },
-    // {
-    //   field: 'businessDetails', headerName: "Business Details", type: 'title', fields: [
-    //     { field: "establishedYear", headerName: "Established Year", type: 'textbox' },
-    //     { field: "employeeCount", headerName: "Employee Count", type: 'textbox' },
-    //     { field: "revenue", headerName: "Revenue", type: 'textbox' },
-    //     { field: "certifications", headerName: "Certifications", type: 'textbox' },
-    //   ]
-    // },
-  ];
-  // socialLinks: { linkedin: "", twitter: "", facebook: "" },
-  // businessDetails: { establishedYear: new Date().getFullYear(), employeeCount: "", revenue: "", certifications: [] },
-  // tags: [],
-  // isActive: true
-
+  const [filterColumns, setFilterColumns] = useState<any[]>();
+  useEffect(() => {
+    if (players) {
+      setEditableColumns(getTenderPayload(activeCompanies || [], activeStates || []));
+      setFilterColumns(getFilterPayload(activeCompanies || [], activeStates || []));
+    }
+  }, [players,activeCompanies,activeStates]);
   const fetcTenders = useCallback(async () => {
     try {
-      getAllActiveTenders(dispatch)();
+      getAllActiveCompanies(dispatch, {})();
+      getAllActiveTenders(dispatch, {})();
+      getAllActiveStates(dispatch)();
       getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
@@ -432,7 +387,7 @@ const Page = memo(function Page() {
       <Paper sx={{ height: "auto", width: "100%" }}>
         <Box sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1 }}>
-            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Tender Name" margin="normal" />
+            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Tender Name1" margin="normal" />
             <Box sx={{ textAlign: "right", pt: 2 }}>
               <IconButton variant="contained" size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }}>
                 <SearchIcon fontSize="small" />
@@ -443,7 +398,7 @@ const Page = memo(function Page() {
             </Box>
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
-            <ColSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
+            <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
             <PermissionCheck action={OEM_ADD}>
               <Tooltip title="Add New Tender" placement="top">
                 <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
@@ -470,8 +425,8 @@ const Page = memo(function Page() {
       <TenderModel />
       <DeleteDialog />
       <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
-      <CommonDrawer title={'Add New Tender'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
-      <CommonDrawer title={'Edit Tender'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={'Add New Tender'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={'Edit Tender'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Import Data'} isOpen={isDrawer && drawerAction === 'import'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Import" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Export Data'} isOpen={isDrawer && drawerAction === 'export'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Export" buttonCancelLabel="Cancel" />
     </PageContainer>
