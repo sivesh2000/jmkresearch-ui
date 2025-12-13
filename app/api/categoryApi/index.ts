@@ -1,24 +1,29 @@
 import axiosInstance from "../axiosIntance"
 import { setCategories, setLoading, setError, setFilterPlayers } from "@/app/redux/slices/categorySlices/ActiveCategoriesSlice"
 import { Dispatch } from "@reduxjs/toolkit"
+import { parseQueryParams } from "@/app/utils/functions"
 
-export const getAllActiveCategories = (dispatch: Dispatch) => async () => {
+export const getAllActiveCategories = (dispatch: Dispatch, filters: any) => async () => {
     try {
         dispatch(setLoading(true));
-        const response = await axiosInstance.get('categories');
+        const queryParam = parseQueryParams(filters,'');
+        const url = 'categories?' + queryParam;
+        const response = await axiosInstance.get(url);
         const categories = response?.data?.results || []
-        dispatch(setCategories(categories));
+        const filterParentCategories = categories.filter((category: any) => category.parentId === null);
+        dispatch(setCategories(filterParentCategories));
         dispatch(setError(null));
     } catch (error) {
         console.error('Error fetching categories:', error);
         dispatch(setError('Failed to fetch categories'));
+        dispatch(setCategories([]));
         throw error;
     } finally {
         dispatch(setLoading(false));
     }
 }
 
-export const addCategory = (dispatch: Dispatch) => async (formData: { name: string; isActive: boolean }) => {
+export const addCategory = (dispatch: Dispatch) => async (formData: { name: string; slug: string; description: string; parentId: string, isActive: boolean }) => {
     try {
         console.log("formdata", formData);
         dispatch(setLoading(true));
@@ -35,7 +40,7 @@ export const addCategory = (dispatch: Dispatch) => async (formData: { name: stri
     }
 }
 
-export const editCategory = (dispatch: Dispatch) => async (id: number, formData: { name: string; isActive: boolean }) => {
+export const editCategory = (dispatch: Dispatch) => async (id: number, formData: { name: string; slug: string; description: string; isActive: boolean }) => {
     try {
         console.log("id:", id, "formdata", formData);
         dispatch(setLoading(true));

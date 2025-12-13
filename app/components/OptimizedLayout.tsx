@@ -109,7 +109,7 @@ export default function OptimizedLayout({
       },
       ...(session?.user?.userType === "super_admin"
         ? [
-            {
+            { 
               segment: "master",
               title: "Master Data",
               icon: <StarBorderOutlinedIcon />,
