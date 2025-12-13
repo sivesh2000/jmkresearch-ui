@@ -55,15 +55,20 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
 
 
     const renderInput = (cols: any, parent: string) => {
-        const prefix = (parent ? '.' + parent : '');
+        const prefix = (parent ? parent + '.' : '');
         const onChangeHandler = (key: string, value: any) => {
             setLocalData((prev: any) => {
                 if (!parent) {
                     return { ...prev, [key]: value };
                 }
-                return {
-                    ...prev, [parent]: { ...(prev[parent] ?? {}), [key]: value }
-                };
+                let obj = { ...prev };
+                try {
+                    obj[parent][key] = value;
+                } catch (error) {
+                    obj[parent] = { [key]: value }
+                }
+
+                return (obj);
             });
         };
         return (cols?.map((column: any, idx: number) => {
@@ -97,15 +102,14 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
                     switch (column.type) {
                         case 'textbox':
                             return (<TextField key={prefix + column.field} id={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal"
-                                value={localData[prefix + column.field] ?? ""}
+                                value={localData[prefix + column.field]} 
                                 onChange={(e) => onChangeHandler(column.field, e.target.value)} />);
-                        // onChange={(e) => setLocalData({ ...localData, [column.field]: e.target.value })} />);
                         case 'textarea':
-                            return (<TextField key={column.field} fullWidth variant="standard" label={column.headerName} margin="normal" multiline rows={4}
+                            return (<TextField key={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal" multiline rows={4}
                                 value={localData[column.field] || null}
                                 onChange={(e) => onChangeHandler(column.field, e.target.value)} />);
                         case 'dropdown':
-                            return (<FormControl fullWidth variant="standard" key={column.field}>
+                            return (<FormControl fullWidth variant="standard" key={prefix + column.field}>
                                 <InputLabel>{column.headerName}</InputLabel>
                                 <Select value={localData[column.field] || null}
                                     onChange={(e) => onChangeHandler(column.field, e.target.value)}>

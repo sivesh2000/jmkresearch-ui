@@ -9,7 +9,7 @@ import {
   Box, Button, IconButton, Menu, MenuItem, Modal, TextField, Typography,
   FormControl, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent,
   DialogContentText, DialogActions, Chip, InputLabel, Select, ListItemText, Checkbox,
-  List, ListItem, ListItemButton, ListItemIcon, Tooltip
+  List, ListItem, ListItemButton, ListItemIcon, Tooltip, ButtonBase
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -17,7 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
+import CloseIcon from "@mui/icons-material/Refresh";
 import DownloadIcon from "@mui/icons-material/Download";
 import UploadIcon from "@mui/icons-material/Upload";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -32,15 +32,17 @@ import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
 import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { parseQueryParams } from '../../../../utils/functions';
-import { buildPayload } from '../helper';
+import { buildPayload, getCompanyPayload, getFilterPayload } from '../helper';
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
+import ColumnSelector from "@/app/components/ColumnSelector";
 const Page = memo(function Page() {
   const dispatch = useDispatch();
   const { activeCompanies, isLoading, error, players } = useSelector((state: RootState) => state.activeCompanies);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
+  const [searchValue, setSearchValue] = useState<String>('');
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ make_name: "", status: true, id: null });
   const [isEdit, setIsEdit] = useState(false);
@@ -68,51 +70,22 @@ const Page = memo(function Page() {
     { field: "contactInfo.pincode", headerName: "Pincode", flex: 1 },
   ];
 
-  const filterColumns: any[] = [
-    { field: "name", headerName: "Company Name", type: 'textbox' },
-    { field: "playerType", multiple: true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
-    { field: "description", headerName: "Brief Overview", type: 'textbox' },
-    { field: "slug", headerName: "Slug", type: 'textbox' },
-    { field: "website", headerName: "Website", type: 'textbox' },
-    { field: "logoUrl", headerName: "Logo Url", type: 'textbox' },
-    {
-      field: 'contactInfo', headerName: "Contact Information", type: 'title', fields: [
-        { field: "email", headerName: "Email Address", type: 'textbox' },
-        { field: "phone", headerName: "Contact/Phone Number", type: 'textbox' },
-        { field: "address", headerName: "Address", type: 'textbox' },
-        { field: "city", headerName: "City", type: 'textbox' },
-        { field: "state", headerName: "State", type: 'textbox' },
-        { field: "country", headerName: "Country", type: 'textbox' },
-        { field: "pincode", headerName: "Pincode", type: 'textbox' },
-      ]
-    },
-    {
-      field: 'socialLinks', headerName: "Social Links", type: 'title', fields: [
-        { field: "linkedin", headerName: "LinkedIn", type: 'textbox' },
-        { field: "twitter", headerName: "Twitter", type: 'textbox' },
-        { field: "facebook", headerName: "Facebook", type: 'textbox' },
-      ]
-    },
-    {
-      field: 'businessDetails', headerName: "Business Details", type: 'title', fields: [
-        { field: "establishedYear", headerName: "Established Year", type: 'textbox' },
-        { field: "employeeCount", headerName: "Employee Count", type: 'textbox' },
-        { field: "revenue", headerName: "Revenue", type: 'textbox' },
-        { field: "certifications", headerName: "Certifications", type: 'textbox' },
-      ]
-    },
-  ];
-  // socialLinks: { linkedin: "", twitter: "", facebook: "" },
-  // businessDetails: { establishedYear: new Date().getFullYear(), employeeCount: "", revenue: "", certifications: [] },
-  // tags: [],
-  // isActive: true
+  const [newCompany, setNewCompany] = useState<any[]>();
+  const [filterColumns, setFilterColumns] = useState<any[]>();
+
+  useEffect(() => {
+    if (players) {
+      setNewCompany(getCompanyPayload(players || []));
+      setFilterColumns(getFilterPayload(players || []));
+    }
+  }, [players]);
+
 
   const fetcCompanies = useCallback(async () => {
     try {
-      getAllActiveCompanies(dispatch)();
+      getAllActiveCompanies(dispatch, {})();
       getAllFilterPlayers(dispatch)();
     } catch (error) {
-      // Handle error silently
       toast.error("Failed to fetch company/filters." + (error as any).response || "");
     }
   }, [dispatch]);
@@ -190,7 +163,6 @@ const Page = memo(function Page() {
       setIsEdit(true);
       setModalOpen(true);
     } else if (task === "Delete") {
-      console.log("Delete", selectedRow)
       setDeleteRow(selectedRow);
       setDeleteDialogOpen(true);
     } else {
@@ -256,7 +228,6 @@ const Page = memo(function Page() {
   };
 
   const handleFilter = (params: any) => {
-    console.log("Params", params)
     getAllActiveCompanies(dispatch, params)();
     setDrawer(false);
   }
@@ -332,83 +303,25 @@ const Page = memo(function Page() {
     setDrawer(true);
   }
 
-  const ColSelector: React.FC = ({ options, selCol, setSelCol }: any) => {
-    const [viewCols, setViewCols] = useState(false);
-    const [checked, setChecked] = useState<any[]>(selCol || []);
-
-    const handleToggle = (value: any) => {
-      console.log("Value", checked)
-      const isExist = checked.find(x => x.field === value.field);
-      if (isExist) {
-        setChecked(checked.filter(x => x.field !== value.field));
-      } else {
-        setChecked([...checked, value]);
-      }
-
-    };
-
-    return (
-      <>
-        <Tooltip title="Columns selection" placement="top">
-          <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => setViewCols(true)}>
-            <SettingsIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Modal open={viewCols} onClose={() => setViewCols(false)}>
-          <Box sx={{
-            position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" },
-            width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 },
-            borderRadius: { xs: 0, sm: 2 }, overflow: "auto",
-          }}>
-            <Typography variant="h6" mb={3}>Select Columns</Typography>
-
-            <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', position: 'relative', overflow: 'auto', maxHeight: 300, '& ul': { padding: 0 }, }}>
-              {options.map((e: GridColDef) => {
-                const labelId = `checkbox-list-label-${e.field}`;
-                return (
-                  <ListItem key={e.field} disablePadding>
-                    <ListItemButton onClick={() => handleToggle(e)} dense>
-                      <ListItemIcon>
-                        <Checkbox edge="start" checked={checked.includes(e)} tabIndex={-1} disableRipple inputProps={{ "aria-labelledby": labelId }} />
-                      </ListItemIcon>
-                      <ListItemText id={labelId} primary={e.headerName} />
-                    </ListItemButton>
-                  </ListItem>
-                );
-              })}
-            </List>
-
-            <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-              <Button className="button-common button-primary" variant="contained" fullWidth onClick={() => {
-                console.log("Selected", checked)
-                setSelCol(checked);
-                // setViewCols(false);
-              }}>OK</Button>
-              <Button className="button-common buttonColor" variant="outlined" fullWidth onClick={() => setViewCols(false)} >Cancel</Button>
-            </Box>
-          </Box>
-        </Modal>
-      </>
-    );
-  };
-
   return (
     <PageContainer>
       <Paper sx={{ height: "auto", width: "100%" }}>
         <Box sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1 }}>
-            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Company Name" margin="normal" />
+            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Search..." margin="normal" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             <Box sx={{ textAlign: "right", pt: 2 }}>
-              <IconButton variant="contained" size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }}>
+              <IconButton key='btn1' variant="contained" size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }}
+                onClick={() => { handleFilter({ search: searchValue }) }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }}>
+              <IconButton key='btn2' size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }}
+                onClick={() => { handleFilter({ search: '' }); setSearchValue(''); }}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </Box>
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
-            <ColSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
+            <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
             <PermissionCheck action={OEM_ADD}>
               <Tooltip title="Add New Company" placement="top">
                 <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
@@ -435,7 +348,7 @@ const Page = memo(function Page() {
       <CompanyModel />
       <DeleteDialog />
       <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
-      <CommonDrawer title={'Add New Company'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={'Add New Company'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={newCompany} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Edit Company'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={filterColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Import Data'} isOpen={isDrawer && drawerAction === 'import'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Import" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Export Data'} isOpen={isDrawer && drawerAction === 'export'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Export" buttonCancelLabel="Cancel" />
