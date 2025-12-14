@@ -44,7 +44,7 @@ export const editCategory = (dispatch: Dispatch) => async (id: number, formData:
     try {
         console.log("id:", id, "formdata", formData);
         dispatch(setLoading(true));
-        const response = await axiosInstance.put(`categories/${id}`, formData);
+        const response = await axiosInstance.patch(`categories/${id}`, formData);
         dispatch(setError(null));
         // Refresh the categories list after edit
         await getAllActiveCategories(dispatch)();

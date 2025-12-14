@@ -54,9 +54,6 @@ const Page = memo(function Page() {
     { field: "icon", headerName: "Icon", flex: 1 },
     { field: "color", headerName: "Color", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
-    { field: "createdAt", headerName: "Created", flex: 1 },
-    { field: "updatedAt", headerName: "Updated", flex: 1 },
-    { field: "isVerified", headerName: "Verification", flex: 1, renderCell: (params: any) => params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />), },
   ];
 
   useEffect(() => {

@@ -8,14 +8,17 @@ const defaultPayload = {
     icon: '',
     parentId: null
 };
-export const buildPayload = (input: any) => {
+export const buildPayload = (input: any, action:String="edit") => {
     console.log("inputs", input)
-    // const 
-    return {
+    let response ={
         ...defaultPayload,
         ...input,
         isActive: input.value || true
     };
+    if(action === 'new'){
+        delete response['id'];
+    }
+    return response;
 };
 
 export const getCategoryPayload = (players: String[]) => {

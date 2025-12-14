@@ -246,7 +246,7 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                 {columns && <form onSubmit={onSubmit} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }} key={formKey}>
                     {renderInput(columns, '')}
                     <Box sx={{ display: "flex", gap: 1, mt: 2, bgcolor: "background.paper", pt: 2, }}>
-                        {buttonClearLabel && <Button type="submit" variant="contained" className="button-primary button-common" fullWidth>{buttonOkLabel ? buttonOkLabel : 'OK'}</Button>}
+                        {buttonOkLabel && <Button type="submit" variant="contained" className="button-primary button-common" fullWidth>{buttonOkLabel ? buttonOkLabel : 'OK'}</Button>}
                         {buttonClearLabel && <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={resetForm}>Clear</Button>}
                         {!buttonClearLabel && buttonCancelLabel && <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={handleClose}>{buttonCancelLabel ? buttonCancelLabel : 'Cancel'}</Button>}
                     </Box>
