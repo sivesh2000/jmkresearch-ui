@@ -1,3 +1,5 @@
+# Production
+app/api/axiosIntance.ts
 
 # Logs
 logs

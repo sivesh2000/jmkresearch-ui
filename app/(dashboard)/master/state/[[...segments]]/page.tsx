@@ -144,7 +144,7 @@ const Page = memo(function Page() {
 
   useEffect(() => {
     fetchStates();
-  }, []);
+  }, [fetchStates]);
 
   useEffect(() => {
     console.log("Active Makes:", activeStates);
@@ -309,7 +309,7 @@ const Page = memo(function Page() {
     } catch (err) {
       toast.error(
         "Operation failed. Please try again." +
-          (err as any).response.data.message || ""
+        (err as any).response.data.message || ""
       );
     }
   };

@@ -28,7 +28,6 @@ import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
-import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { buildPayload, getCategoryPayload, getFilterPayload } from '../helper';
 import { options, set } from "jodit/esm/core/helpers";
 // import { buildPayload } from '../helper';
@@ -58,7 +57,7 @@ const Page = memo(function Page() {
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
   const [filterColumns, setFilterColumns] = useState<any[]>();
-  const [editableColumns, setEditableColumns] = useState([]);
+  const [editableColumns, setEditableColumns] = useState<any[]>([]);
   const [editRow, setEditRow] = useState<any>();
   const optionalColumns: GridColDef[] = [
     { field: "slug", headerName: "Slug", flex: 1 },
@@ -72,7 +71,7 @@ const Page = memo(function Page() {
       setFilterColumns(getFilterPayload(players || []));
       setEditableColumns(getCategoryPayload(players || []));
     }
-  }, [activeCategories]);
+  }, [activeCategories, players]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -88,7 +87,7 @@ const Page = memo(function Page() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   useEffect(() => {
     // console.log("Active Makes:", activeCategories);
@@ -213,15 +212,15 @@ const Page = memo(function Page() {
     return (
       <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
         {/* <MenuItem onClick={() => handleAction('View')}>View</MenuItem> */}
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
-        </PermissionCheck>
+        {/* <PermissionCheck action={OEM_EDIT}> */}
+        <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
+        {/* </PermissionCheck> */}
+        {/* <PermissionCheck action={OEM_EDIT}> */}
+        <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
+        {/* </PermissionCheck> */}
+        {/* <PermissionCheck action={OEM_EDIT}> */}
+        <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
+        {/* </PermissionCheck> */}
         {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
       </Menu>
     );
@@ -264,7 +263,7 @@ const Page = memo(function Page() {
     setDrawer(true);
   };
 
-  const ColSelector: React.FC<ColSelectorProps> = ({
+  const ColSelector: React.FC<any> = ({
     options,
     selCol,
     setSelCol,
@@ -414,17 +413,11 @@ const Page = memo(function Page() {
               <SettingsIcon fontSize="small" />
             </IconButton> */}
             <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
-            <PermissionCheck action={OEM_ADD}>
-              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
-                <AddIcon fontSize="small" />
-              </IconButton>
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ExportData dataArray={activeCategories} type={'button'} columns={columns} />
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ImportData title="Import Data" />
-            </PermissionCheck>
+            <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
+              <AddIcon fontSize="small" />
+            </IconButton>
+            <ExportData dataArray={activeCategories} type={'button'} columns={columns} />
+            <ImportData title="Import Data" />
             <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => onActionClicked("filter")}>
               <Filter1OutlinedIcon fontSize="small" />
             </IconButton>

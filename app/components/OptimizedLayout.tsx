@@ -3,6 +3,8 @@ import React, { useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
 import { NextAppProvider } from "@toolpad/core/nextjs";
 import { usePermissions } from "@/app/utils/permissions";
+import Link from "next/link";
+import Image from "next/image";
 import {
   USERS_VIEW,
   MODEL_VIEW,
@@ -39,6 +41,7 @@ interface OptimizedLayoutProps {
   theme: any;
 }
 
+
 const getBranding = (session: any) => ({
   title: '',
   logo: (
@@ -49,7 +52,15 @@ const getBranding = (session: any) => ({
         justifyContent: "space-between",
         gap: 12,
       }}
-    ><a href="/"><img src="/logo.png" alt="JMK Logo" style={{ height: 40 }} /></a>
+    ><Link href="/" aria-label="Home">
+        <Image
+          src="/logo.png"
+          alt="JMK Logo"
+          width={120}
+          height={40}
+          priority
+        />
+      </Link>
     </div>
   ),
 });
@@ -108,110 +119,110 @@ export default function OptimizedLayout({
       },
       ...(session?.user?.userType === "super_admin"
         ? [
-          {
-            segment: "master",
-            title: "Master Data",
-            icon: <StarBorderOutlinedIcon />,
-            //permission: MASTER_DATA_VIEW,
-            children: [
-              {
-                segment: "company",
-                title: "Company",
-                icon: <SettingsSystemDaydreamOutlined />,
-                pattern: "company{/:companyId}*",
-              },
-              {
-                segment: "category",
-                title: "Category",
-                icon: <CategoryOutlinedIcon />,
-                pattern: "category{/:categoryId}*",
-              },
-              {
-                segment: "subcategory",
-                title: "Sub Category",
-                icon: <AccountTreeOutlinedIcon />,
-                pattern: "subcategory{/:subcategoryId}*",
-              },
-              {
-                segment: "state",
-                title: "State",
-                icon: <LocationCityIcon />,
-                pattern: "state{/:stateId}*",
-              },
-              {
-                segment: "tenders",
-                title: "Tender",
-                icon: <LocationCityIcon />,
-                pattern: "tenders{/:tenderId}*",
-              },
-              {
-                segment: "project",
-                title: "Project",
-                icon: <LocationCityIcon />,
-                pattern: "project{/:projectId}*",
-              },
-              {
-                segment: "document",
-                title: "Document",
-                icon: <LocationCityIcon />,
-                pattern: "document{/:DocumentId}*",
-              },
-              {
-                segment: "chart",
-                title: "Chart",
-                icon: <LocationCityIcon />,
-                pattern: "chart{/:chartId}*",
-              },
-              {
-                segment: "helpdeskmapping",
-                title: "Help Desk Mapping",
-                icon: <SupportAgentOutlinedIcon />,
-                pattern: "helpdeskmapping{/:helpdeskmappingId}*",
-                permission: HELP_DESK_MAPPING_VIEW,
-              },
-            ],
-          },
-          {
-            segment: "settings",
-            title: "Settings",
-            icon: <AdminPanelSettingsOutlinedIcon />,
-            permission: ROLES_VIEW,
-            children: [
-              {
-                segment: "roles",
-                title: "Roles",
-                icon: <AssignmentIndOutlinedIcon />,
-                pattern: "roles{/:rolesId}*",
-                permission: ROLES_VIEW,
-              },
-              {
-                segment: "permissions",
-                title: "Permissions",
-                icon: <LockOutlinedIcon />,
-                pattern: "permissions{/:permissionsId}*",
-                permission: PERMISSIONS_VIEW,
-              },
-              {
-                segment: "assignpermissions",
-                title: "Assign Permissions",
-                icon: <GroupOutlinedIcon />,
-                pattern: "assignpermissions{/:assignpermissionsId}*",
-                permission: ASSIGN_PERMISSIONS_VIEW,
-              },
-            ],
-          },
-        ]
+            { 
+              segment: "master",
+              title: "Master Data",
+              icon: <StarBorderOutlinedIcon />,
+              //permission: MASTER_DATA_VIEW,
+              children: [
+                {
+                  segment: "company",
+                  title: "Company",
+                  icon: <SettingsSystemDaydreamOutlined />,
+                  pattern: "company{/:companyId}*",
+                },
+                {
+                  segment: "category",
+                  title: "Category",
+                  icon: <CategoryOutlinedIcon />,
+                  pattern: "category{/:categoryId}*",
+                },
+                {
+                  segment: "subcategory",
+                  title: "Sub Category",
+                  icon: <AccountTreeOutlinedIcon />,
+                  pattern: "subcategory{/:subcategoryId}*",
+                },
+                {
+                  segment: "state",
+                  title: "State",
+                  icon: <LocationCityIcon />,
+                  pattern: "state{/:stateId}*",
+                },
+                {
+                  segment: "tenders",
+                  title: "Tender",
+                  icon: <LocationCityIcon />,
+                  pattern: "tenders{/:tenderId}*",
+                },
+                {
+                  segment: "project",
+                  title: "Project",
+                  icon: <LocationCityIcon />,
+                  pattern: "project{/:projectId}*",
+                },
+                {
+                  segment: "document",
+                  title: "Document",
+                  icon: <LocationCityIcon />,
+                  pattern: "document{/:DocumentId}*",
+                },
+                {
+                  segment: "chart",
+                  title: "Chart",
+                  icon: <LocationCityIcon />,
+                  pattern: "chart{/:chartId}*",
+                },
+                {
+                  segment: "helpdeskmapping",
+                  title: "Help Desk Mapping",
+                  icon: <SupportAgentOutlinedIcon />,
+                  pattern: "helpdeskmapping{/:helpdeskmappingId}*",
+                  permission: HELP_DESK_MAPPING_VIEW,
+                },
+              ],
+            },
+            {
+              segment: "settings",
+              title: "Settings",
+              icon: <AdminPanelSettingsOutlinedIcon />,
+              permission: ROLES_VIEW,
+              children: [
+                {
+                  segment: "roles",
+                  title: "Roles",
+                  icon: <AssignmentIndOutlinedIcon />,
+                  pattern: "roles{/:rolesId}*",
+                  permission: ROLES_VIEW,
+                },
+                {
+                  segment: "permissions",
+                  title: "Permissions",
+                  icon: <LockOutlinedIcon />,
+                  pattern: "permissions{/:permissionsId}*",
+                  permission: PERMISSIONS_VIEW,
+                },
+                {
+                  segment: "assignpermissions",
+                  title: "Assign Permissions",
+                  icon: <GroupOutlinedIcon />,
+                  pattern: "assignpermissions{/:assignpermissionsId}*",
+                  permission: ASSIGN_PERMISSIONS_VIEW,
+                },
+              ],
+            },
+          ]
         : []),
       ...(session?.user?.userType !== "user"
         ? [
-          {
-            segment: "users",
-            title: "Users",
-            icon: <PersonIcon />,
-            pattern: "users{/:usersId}*",
-            permission: USERS_VIEW,
-          },
-        ]
+            {
+              segment: "users",
+              title: "Users",
+              icon: <PersonIcon />,
+              pattern: "users{/:usersId}*",
+              permission: USERS_VIEW,
+            },
+          ]
         : []),
       {
         title: "My Account",

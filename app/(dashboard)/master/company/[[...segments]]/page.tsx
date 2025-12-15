@@ -143,9 +143,7 @@ const Page = memo(function Page() {
     }
   }, [dispatch]);
 
-  useEffect(() => {
-    fetcCompanies();
-  }, []);
+  useEffect(() => {fetcCompanies();}, [fetcCompanies]);
 
   useEffect(() => {
     // console.log("Active Makes:", activeCompanies);

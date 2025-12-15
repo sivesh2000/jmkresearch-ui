@@ -160,7 +160,7 @@ const Page = memo(function Page() {
 
   useEffect(() => {
     fetchSubCategories();
-  }, []);
+  }, [fetchSubCategories]);
 
   useEffect(() => {
     // console.log("Active SubCategory:", activeSubCategories);

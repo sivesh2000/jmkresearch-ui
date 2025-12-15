@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
@@ -64,20 +64,20 @@ export default function Page() {
     (state: RootState) => state.rolesData
   );
 
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     try {
       await getAllRolesData(dispatch)();
-    } catch (error) {
-      toast.error(
-        "Failed to fetch roles data: " +
-          (error as any).response?.data?.message || ""
-      );
-    }
-  };
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to fetch roles data";
 
-  useEffect(() => {
-    fetchAllData();
+      toast.error(message);
+    }
   }, [dispatch]);
+
+  useEffect(() => { fetchAllData(); }, [dispatch, fetchAllData]);
 
   // Handle switch toggle
   const handleSwitch = async (row: any) => {
@@ -88,7 +88,7 @@ export default function Page() {
     } catch (error) {
       toast.error(
         "Failed to update role status" +
-          (error as any).response?.data?.message || ""
+        (error as any).response?.data?.message || ""
       );
     }
   };

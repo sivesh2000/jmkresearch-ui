@@ -1,3 +1,14 @@
+import { GridColDef, GridDownloadIcon } from "@mui/x-data-grid";
+export type ColumnConfig = {
+  field: string;
+  headerName: string;
+  flex: number;
+  type: string;
+  options?: any[];
+  optionLabelField?: string;
+  optionValueField?: string;
+  all?: boolean;
+};
 
 const defaultPayload = {
     tenderName: "",
@@ -42,7 +53,7 @@ export const buildPayload = (input: any) => {
 };
 
 
-export const getTenderPayload = (companies: any[], states:any[]) => {
+export const getTenderPayload = (companies: GridColDef[], states:any[]) => {
     console.log("Companies", companies)
     console.log("states", states)
     return ([

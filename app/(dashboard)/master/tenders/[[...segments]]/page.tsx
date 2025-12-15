@@ -54,9 +54,8 @@ import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
-import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { parseQueryParams } from '../../../../utils/functions';
-import { buildPayload, getFilterPayload, getTenderPayload } from '../helper';
+import { buildPayload, getFilterPayload, getTenderPayload, ColumnConfig } from '../helper';
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
 import ColumnSelector from "@/app/components/ColumnSelector";
@@ -117,10 +116,10 @@ const Page = memo(function Page() {
   const [filterColumns, setFilterColumns] = useState<any[]>();
   useEffect(() => {
     if (players) {
-      setEditableColumns(getTenderPayload(activeCompanies || [], activeStates || []));
+      // setEditableColumns(getTenderPayload(activeCompanies, activeStates));
       setFilterColumns(getFilterPayload(activeCompanies || [], activeStates || []));
     }
-  }, [players,activeCompanies,activeStates]);
+  }, [players, activeCompanies, activeStates]);
   const fetcTenders = useCallback(async () => {
     try {
       getAllActiveCompanies(dispatch, {})();
@@ -137,7 +136,7 @@ const Page = memo(function Page() {
 
   useEffect(() => {
     fetcTenders();
-  }, []);
+  }, [fetcTenders]);
 
   useEffect(() => {
     // console.log("Active Makes:", activeTenders);
@@ -311,7 +310,7 @@ const Page = memo(function Page() {
     } catch (err) {
       toast.error(
         "Operation failed. Please try again." +
-          (err as any).response.data.message || ""
+        (err as any).response.data.message || ""
       );
     }
   };
@@ -466,7 +465,7 @@ const Page = memo(function Page() {
     setDrawer(true);
   };
 
-  const ColSelector: React.FC<ColSelectorProps> = ({
+  const ColSelector: React.FC<any> = ({
     options,
     selCol,
     setSelCol,
@@ -607,19 +606,13 @@ const Page = memo(function Page() {
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
             <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
-            <PermissionCheck action={OEM_ADD}>
-              <Tooltip title="Add New Tender" placement="top">
-                <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
-                  <AddIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ExportData dataArray={activeTenders} type={'button'} columns={columns} />
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ImportData title="Import Data" />
-            </PermissionCheck>
+            <Tooltip title="Add New Tender" placement="top">
+              <IconButton size="small" sx={{ background: '#dedede', mr: 1, '&:hover': { color: 'red' } }} onClick={() => onActionClicked('add')}>
+                <AddIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <ExportData dataArray={activeTenders} type={'button'} columns={columns} />
+            <ImportData title="Import Data" />
             <Tooltip title="Filter tender data" placement="top">
               <IconButton
                 size="small"

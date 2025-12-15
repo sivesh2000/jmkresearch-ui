@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
@@ -64,12 +64,18 @@ export default function Page() {
     permissionDescription: "",
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const fetchAllData = async () => {
+ 
+const fetchAllData = useCallback(async () => {
+  try {
     await getAllPermissionsData(dispatch)();
-  };
+  } catch (error: any) {
+    console.error("Failed to fetch permissions data", error);
+  }
+}, [dispatch]);
+
   useEffect(() => {
     fetchAllData();
-  }, [dispatch]);
+  }, [dispatch, fetchAllData]);
   const { permissionsData, domainsData } = useSelector(
     (state: RootState) => state.permissionsData
   );
@@ -336,7 +342,7 @@ export default function Page() {
     } catch (error) {
       toast.error(
         `Error ${isEdit ? "updating" : "creating"} permission: ` +
-          (error as any).response?.data?.message
+        (error as any).response?.data?.message
       );
     }
   };
