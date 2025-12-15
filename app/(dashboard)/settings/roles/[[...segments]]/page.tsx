@@ -26,12 +26,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { RootState, AppDispatch } from "../../../../redux/store";
 import "../../../../global.css";
-import {
-  getAllFinancierData,
-  editFinancier,
-  addFinancier,
-  deleteFinancier,
-} from "@/app/api/financierApi";
+
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LazyDataGrid from "@/app/components/LazyDataGrid";

@@ -44,7 +44,6 @@ import {
   updateUser,
   deleteUsers,
   createUser,
-  getLocationsByMasterDealer,
   assignRolesToUser,
   getAllRolesUser,
 } from "@/app/api/usersApi";
@@ -1006,21 +1005,12 @@ const Page = memo(function Page() {
                     value={formData.mainDealerRef}
                     onChange={async (e) => {
                       handleInputChange("mainDealerRef", e.target.value);
-                      await getLocationsByMasterDealer(dispatch, {
-                        userRef: e.target.value,
-                      });
                     }}
                     margin="normal"
                     required
                     error={!!formErrors.mainDealerRef}
                     helperText={formErrors.mainDealerRef}
-                  >
-                    {(userDealerData || []).map((dealer) => (
-                      <MenuItem key={dealer.id} value={dealer.id}>
-                        {dealer.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                  ></TextField>
                   <TextField
                     select
                     fullWidth
@@ -1035,13 +1025,7 @@ const Page = memo(function Page() {
                     required
                     error={!!formErrors.location}
                     helperText={formErrors.location}
-                  >
-                    {locationData.map((loc) => (
-                      <MenuItem key={loc.id} value={loc._id}>
-                        {loc.title}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                  ></TextField>
                 </>
               )}
             </>

@@ -5,7 +5,31 @@ import LazyDataGrid from "../../../../components/LazyDataGrid";
 import CommonDrawer from "../../../../components/CommonDrawer";
 import Paper from "@mui/material/Paper";
 import { PageContainer } from "@toolpad/core";
-import { Box, Button, IconButton, Menu, MenuItem, Modal, TextField, Typography, FormControl, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Chip, InputLabel, Select, ListItemText, Checkbox, List, ListItem, ListItemButton,
+import {
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Modal,
+  TextField,
+  Typography,
+  FormControl,
+  Switch,
+  FormControlLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Chip,
+  InputLabel,
+  Select,
+  ListItemText,
+  Checkbox,
+  List,
+  ListItem,
+  ListItemButton,
   ListItemIcon,
   Tooltip,
 } from "@mui/material";
@@ -24,18 +48,21 @@ import {
   editSubCategory,
   deleteSubCategory,
 } from "@/app/api/subCategoryApi";
-import {
-  getAllActiveCategories,
-} from "@/app/api/categoryApi";
+import { getAllActiveCategories } from "@/app/api/categoryApi";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
-import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { options, set } from "jodit/esm/core/helpers";
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
+
+interface ColSelectorProps {
+  options: GridColDef[];
+  selCol: GridColDef[];
+  setSelCol: (cols: GridColDef[]) => void;
+}
 
 const Page = memo(function Page() {
   const dispatch = useDispatch();
@@ -139,80 +166,82 @@ const Page = memo(function Page() {
     // console.log("Active SubCategory:", activeSubCategories);
   }, [activeSubCategories]);
 
-
   const [columns, setColumns] = useState<GridColDef[]>([
-      { field: "name", headerName: "Sub Category Name", flex: 1 },
-      { field: "subCatName", headerName: "Category Name", flex: 1 },
-      {
-        field: "isActive",
-        headerName: "Status",
-        flex: 1,
-        renderCell: (params: any) =>
-          params.value ? (
-            <Chip
-              label="Active"
-              color="success"
-              size="small"
-              variant="outlined"
-            />
-          ) : (
-            <Chip
-              label="Inactive"
-              size="small"
-              color="default"
-              variant="outlined"
-            />
-          ),
-      },
-      {
-        field: "actions",
-        headerName: "Actions",
-        width: 100,
-        renderCell: (params) => (
-          <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
-            <MoreVertIcon color="action" />
-          </IconButton>
+    { field: "name", headerName: "Sub Category Name", flex: 1 },
+    { field: "subCatName", headerName: "Category Name", flex: 1 },
+    {
+      field: "isActive",
+      headerName: "Status",
+      flex: 1,
+      renderCell: (params: any) =>
+        params.value ? (
+          <Chip
+            label="Active"
+            color="success"
+            size="small"
+            variant="outlined"
+          />
+        ) : (
+          <Chip
+            label="Inactive"
+            size="small"
+            color="default"
+            variant="outlined"
+          />
         ),
-      },
-    ]);
-  
-    useEffect(() => {
-      if (selCol) {
-        setColumns([
-          { field: "name", headerName: "Sub Category Name", flex: 1 },
-          { field: "subCatName", headerName: "Category Name", flex: 1 },
-          ...selCol,
-          {
-            field: "isActive",
-            headerName: "Status",
-            flex: 1,
-            renderCell: (params: any) =>
-              params.value ? (
-                <Chip
-                  label="Active"
-                  color="success"
-                  size="small"
-                  variant="outlined"
-                />
-              ) : (
-                <Chip
-                  label="Inactive"
-                  size="small"
-                  color="default"
-                  variant="outlined"
-                />
-              ),
-          },
-          {
-            field: "actions", headerName: "Actions", width: 100, renderCell: (params) => (
-              <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
-                <MoreVertIcon color="action" />
-              </IconButton>
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 100,
+      renderCell: (params) => (
+        <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
+          <MoreVertIcon color="action" />
+        </IconButton>
+      ),
+    },
+  ]);
+
+  useEffect(() => {
+    if (selCol) {
+      setColumns([
+        { field: "name", headerName: "Sub Category Name", flex: 1 },
+        { field: "subCatName", headerName: "Category Name", flex: 1 },
+        ...selCol,
+        {
+          field: "isActive",
+          headerName: "Status",
+          flex: 1,
+          renderCell: (params: any) =>
+            params.value ? (
+              <Chip
+                label="Active"
+                color="success"
+                size="small"
+                variant="outlined"
+              />
+            ) : (
+              <Chip
+                label="Inactive"
+                size="small"
+                color="default"
+                variant="outlined"
+              />
             ),
-          },
-        ]);
-      }
-    }, [selCol]);
+        },
+        {
+          field: "actions",
+          headerName: "Actions",
+          width: 100,
+          renderCell: (params) => (
+            <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
+              <MoreVertIcon color="action" />
+            </IconButton>
+          ),
+        },
+      ]);
+    }
+  }, [selCol]);
 
   const paginationModel = useMemo(() => ({ page: 0, pageSize: 5 }), []);
 
@@ -269,11 +298,17 @@ const Page = memo(function Page() {
 
   const handleModalClose = () => {
     setModalOpen(false);
-    setFormData({ cat_id: "", sub_category_name: "", slug: "",  status: true, id: null });
+    setFormData({
+      cat_id: "",
+      sub_category_name: "",
+      slug: "",
+      status: true,
+      id: null,
+    });
   };
 
   const handleSave = async (data: any) => {
-    console.log(data, "HandleSave")
+    console.log(data, "HandleSave");
     try {
       if (isEdit) {
         const editFunction = editSubCategory(dispatch);
@@ -318,17 +353,11 @@ const Page = memo(function Page() {
   const MenuComponent = () => {
     return (
       <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
-        {/* <MenuItem onClick={() => handleAction('View')}>View</MenuItem> */}
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}> View</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}>Delete</MenuItem>
-        </PermissionCheck>
-        {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
+        <MenuItem onClick={() => handleAction("Edit")}> View</MenuItem>
+
+        <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
+
+        <MenuItem onClick={() => handleAction("Edit")}>Delete</MenuItem>
       </Menu>
     );
   };
@@ -371,110 +400,114 @@ const Page = memo(function Page() {
     setDrawer(true);
   };
 
-  const ColSelector: React.FC = ({ options, selCol, setSelCol }: any) => {
-      const [viewCols, setViewCols] = useState(false);
-      const [checked, setChecked] = useState<any[]>(selCol || []);
-  
-      const handleToggle = (value: any) => {
-        console.log("Value", checked);
-        const isExist = checked.find((x) => x.field === value.field);
-        if (isExist) {
-          setChecked(checked.filter((x) => x.field !== value.field));
-        } else {
-          setChecked([...checked, value]);
-        }
-      };
-  
-      return (
-        <>
-          <Tooltip title="Columns selection" placement="top">
-            <IconButton
-              size="small"
-              sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }}
-              onClick={() => setViewCols(true)}
-            >
-              <SettingsIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Modal open={viewCols} onClose={() => setViewCols(false)}>
-            <Box
+  const ColSelector: React.FC<ColSelectorProps> = ({
+    options,
+    selCol,
+    setSelCol,
+  }) => {
+    const [viewCols, setViewCols] = useState(false);
+    const [checked, setChecked] = useState<any[]>(selCol || []);
+
+    const handleToggle = (value: any) => {
+      console.log("Value", checked);
+      const isExist = checked.find((x) => x.field === value.field);
+      if (isExist) {
+        setChecked(checked.filter((x) => x.field !== value.field));
+      } else {
+        setChecked([...checked, value]);
+      }
+    };
+
+    return (
+      <>
+        <Tooltip title="Columns selection" placement="top">
+          <IconButton
+            size="small"
+            sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }}
+            onClick={() => setViewCols(true)}
+          >
+            <SettingsIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Modal open={viewCols} onClose={() => setViewCols(false)}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: { xs: 0, sm: "50%" },
+              left: { xs: 0, sm: "50%" },
+              transform: { xs: "none", sm: "translate(-50%, -50%)" },
+              width: { xs: "100vw", sm: 400 },
+              height: { xs: "100vh", sm: "auto" },
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: { xs: 2, sm: 4 },
+              borderRadius: { xs: 0, sm: 2 },
+              overflow: "auto",
+            }}
+          >
+            <Typography variant="h6" mb={3}>
+              Select Columns
+            </Typography>
+
+            <List
               sx={{
-                position: "absolute",
-                top: { xs: 0, sm: "50%" },
-                left: { xs: 0, sm: "50%" },
-                transform: { xs: "none", sm: "translate(-50%, -50%)" },
-                width: { xs: "100vw", sm: 400 },
-                height: { xs: "100vh", sm: "auto" },
+                width: "100%",
+                maxWidth: 360,
                 bgcolor: "background.paper",
-                boxShadow: 24,
-                p: { xs: 2, sm: 4 },
-                borderRadius: { xs: 0, sm: 2 },
+                position: "relative",
                 overflow: "auto",
+                maxHeight: 300,
+                "& ul": { padding: 0 },
               }}
             >
-              <Typography variant="h6" mb={3}>
-                Select Columns
-              </Typography>
-  
-              <List
-                sx={{
-                  width: "100%",
-                  maxWidth: 360,
-                  bgcolor: "background.paper",
-                  position: "relative",
-                  overflow: "auto",
-                  maxHeight: 300,
-                  "& ul": { padding: 0 },
+              {options.map((e: GridColDef) => {
+                const labelId = `checkbox-list-label-${e.field}`;
+                return (
+                  <ListItem key={e.field} disablePadding>
+                    <ListItemButton onClick={() => handleToggle(e)} dense>
+                      <ListItemIcon>
+                        <Checkbox
+                          edge="start"
+                          checked={checked.includes(e)}
+                          tabIndex={-1}
+                          disableRipple
+                          inputProps={{ "aria-labelledby": labelId }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText id={labelId} primary={e.headerName} />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
+
+            <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
+              <Button
+                className="button-common button-primary"
+                variant="contained"
+                fullWidth
+                onClick={() => {
+                  console.log("Selected", checked);
+                  setSelCol(checked);
+                  // setViewCols(false);
                 }}
               >
-                {options.map((e: GridColDef) => {
-                  const labelId = `checkbox-list-label-${e.field}`;
-                  return (
-                    <ListItem key={e.field} disablePadding>
-                      <ListItemButton onClick={() => handleToggle(e)} dense>
-                        <ListItemIcon>
-                          <Checkbox
-                            edge="start"
-                            checked={checked.includes(e)}
-                            tabIndex={-1}
-                            disableRipple
-                            inputProps={{ "aria-labelledby": labelId }}
-                          />
-                        </ListItemIcon>
-                        <ListItemText id={labelId} primary={e.headerName} />
-                      </ListItemButton>
-                    </ListItem>
-                  );
-                })}
-              </List>
-  
-              <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-                <Button
-                  className="button-common button-primary"
-                  variant="contained"
-                  fullWidth
-                  onClick={() => {
-                    console.log("Selected", checked);
-                    setSelCol(checked);
-                    // setViewCols(false);
-                  }}
-                >
-                  OK
-                </Button>
-                <Button
-                  className="button-common buttonColor"
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => setViewCols(false)}
-                >
-                  Cancel
-                </Button>
-              </Box>
+                OK
+              </Button>
+              <Button
+                className="button-common buttonColor"
+                variant="outlined"
+                fullWidth
+                onClick={() => setViewCols(false)}
+              >
+                Cancel
+              </Button>
             </Box>
-          </Modal>
-        </>
-      );
-    };
+          </Box>
+        </Modal>
+      </>
+    );
+  };
 
   return (
     <PageContainer>
@@ -499,7 +532,6 @@ const Page = memo(function Page() {
             />
             <Box sx={{ textAlign: "right", pt: 2 }}>
               <IconButton
-                variant="contained"
                 size="small"
                 sx={{
                   background: "#dedede",
@@ -509,6 +541,7 @@ const Page = memo(function Page() {
               >
                 <SearchIcon fontSize="small" />
               </IconButton>
+
               <IconButton
                 size="small"
                 sx={{
@@ -523,29 +556,30 @@ const Page = memo(function Page() {
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
             <ColSelector
-                          options={optionalColumns}
-                          selCol={selCol}
-                          setSelCol={setSelCol}
-                        />
-            <PermissionCheck action={OEM_ADD}>
-              <IconButton
-                size="small"
-                sx={{
-                  background: "#dedede",
-                  mr: 1,
-                  "&:hover": { color: "red" },
-                }}
-                onClick={() => onActionClicked("add")}
-              >
-                <AddIcon fontSize="small" />
-              </IconButton>
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ExportData dataArray={activeSubCategories} type={'button'} columns={columns} />
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ImportData title="Import Data" />
-            </PermissionCheck>
+              options={optionalColumns}
+              selCol={selCol}
+              setSelCol={setSelCol}
+            />
+
+            <IconButton
+              size="small"
+              sx={{
+                background: "#dedede",
+                mr: 1,
+                "&:hover": { color: "red" },
+              }}
+              onClick={() => onActionClicked("add")}
+            >
+              <AddIcon fontSize="small" />
+            </IconButton>
+
+            <ExportData
+              dataArray={activeSubCategories}
+              type={"button"}
+              columns={columns}
+            />
+
+            <ImportData title="Import Data" />
             <IconButton
               size="small"
               sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }}
