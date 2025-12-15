@@ -1,8 +1,8 @@
 import axiosInstance from "../axiosIntance";
 // import { setLoading, setStates, setError } from "../../redux/slices/stateSlices/stateSlice";
 import { setLoading, setStates, setError } from "../../redux/slices/stateSlices/ActiveStatesSlice";
-
 import { Dispatch } from "@reduxjs/toolkit";
+import { parseQueryParams } from "@/app/utils/functions"
 
 // export const getAllStateData = (dispatch: Dispatch) => async () => {
 //     try {
@@ -18,10 +18,13 @@ import { Dispatch } from "@reduxjs/toolkit";
 //     }
 // }
 
-export const getAllActiveStates = (dispatch: Dispatch) => async () => {
+export const getAllActiveStates = (dispatch: Dispatch, filters: any) => async () => {
     try {
         dispatch(setLoading(true));
-        const response = await axiosInstance.get('states');
+        const queryParam = parseQueryParams(filters,'');
+        const url = 'states?' + queryParam;
+        const response = await axiosInstance.get(url);
+        // const response = await axiosInstance.get('states');
         const activeStatesArray = response?.data || []
         dispatch(setStates(activeStatesArray));
         dispatch(setError(null));
