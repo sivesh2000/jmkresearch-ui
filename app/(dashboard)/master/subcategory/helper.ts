@@ -29,18 +29,18 @@ export const buildPayload = (input: any, action:String="edit") => {
     return response;
 };
 
-export const getSubCategoryPayload = (activeCategories: String[]) => {
+export const getSubCategoryPayload = (activeCategories: any[]) => {
     console.log("activeCategories", activeCategories)
     return ([
         { field: "name", headerName: "Sub Category Name", type: "textbox" },
         { field: "slug", headerName: "Slug", type: "textbox" },
-        { field: "parentId", headerName: "Categories", type: "dropdown", options: activeCategories || [], optionLabelField: "name", optionValueField: "id", },
+        { field: "parentId", headerName: "Parent Category", type: "dropdown", options: activeCategories || [], optionLabelField: "name", optionValueField: "_id", },
         { field: "color", headerName: "Color", type: "textbox" },
         { field: "isActive", headerName: "Status", type: "dropdown", options: [{ key: "Active", value: true }, { key: "In-Active", value: false },], optionLabelField: "key", optionValueField: "value", },
         { field: "description", headerName: "Description", type: "textarea", rows: 2 },
     ]);
 };
-export const getFilterPayload = (activeCategories: String[]) => {
+export const getFilterPayload = (activeCategories: any[]) => {
     console.log("activeCategories", activeCategories)
     return ([
         { field: "search", headerName: "Sub Category Name", type: "textbox" },

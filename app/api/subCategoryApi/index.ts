@@ -1,36 +1,31 @@
 import axiosInstance from "../axiosIntance"
 import { setSubCategories, setLoading, setError, setFilterPlayers } from "@/app/redux/slices/subCategorySlices/ActiveSubCategoriesSlice"
+import { setCategories } from "@/app/redux/slices/categorySlices/ActiveCategoriesSlice"
 import { Dispatch } from "@reduxjs/toolkit"
 import { parseQueryParams } from "@/app/utils/functions"
 
 export const getAllActiveSubCategories = (dispatch: Dispatch, filters: any) => async () => {
     try {
         dispatch(setLoading(true));
-        const queryParam = parseQueryParams(filters,'');
+        const queryParam = parseQueryParams(filters, '');
         const url = 'categories?' + queryParam;
         const response = await axiosInstance.get(url);
-        const subCategories = response?.data?.results || []
+
+        const categories = response?.data?.results || []
         // console.log("subCategories", subCategories);
         // const filterSubCategories = subCategories.filter((subCategory: any) => subCategory.parentId != null);
-        const parentCategories = subCategories
-            .filter((category: any) => category.parentId === null)
-            .reduce((acc: any, category: any) => {
-                acc[category.id] = category.name;
-                return acc;
-            }, {});
+        // const parentCategories = categories
+        //     .filter((category: any) => category.parentId === null)
+        //     .reduce((acc: any, category: any) => {
+        //         acc[category.id] = category.name;
+        //         return acc;
+        //     }, {});
 
         // Step 2: Filter subcategories that have a parentId and add subCatName
-        const filterSubCategories = subCategories
-            .filter((subCategory: any) => subCategory.parentId != null)
-            .map((subCategory: any) => {
-                // Add the parent category name as subCatName
-                return {
-                    ...subCategory,
-                    // subCatName: parentCategories[subCategory.parentId] || ''
-                    subCatName: subCategory.parentId.name || ''
-                };
-            });
+        const filterSubCategories = categories.filter((subCategory: any) => subCategory.parentId != null);
+        console.log("Sub Categories",filterSubCategories)
         dispatch(setSubCategories(filterSubCategories));
+        dispatch(setCategories(categories));
         dispatch(setError(null));
     } catch (error) {
         console.error('Error fetching sub categories:', error);
@@ -48,7 +43,7 @@ export const addSubCategory = (dispatch: Dispatch) => async (formData: { name: s
         const response = await axiosInstance.post('categories', formData);
         dispatch(setError(null));
         // Refresh the sub categories list after adding
-        await getAllActiveSubCategories(dispatch,{})();
+        await getAllActiveSubCategories(dispatch, {})();
     } catch (error) {
         console.error('Error adding sub category:', error);
         dispatch(setError('Failed to add sub category'));
@@ -65,7 +60,7 @@ export const editSubCategory = (dispatch: Dispatch) => async (id: number, formDa
         const response = await axiosInstance.patch(`categories/${id}`, formData);
         dispatch(setError(null));
         // Refresh the sub categories list after edit
-        await getAllActiveSubCategories(dispatch,{})();
+        await getAllActiveSubCategories(dispatch, {})();
     } catch (error) {
         console.error('Error editing sub category:', error);
         dispatch(setError('Failed to edit sub category'));
@@ -81,7 +76,7 @@ export const deleteSubCategory = (dispatch: Dispatch) => async (id: number) => {
         const response = await axiosInstance.delete(`categories/${id}`);
         dispatch(setError(null));
         // Refresh the sub categories list after deletion
-        await getAllActiveSubCategories(dispatch,{})();
+        await getAllActiveSubCategories(dispatch, {})();
     } catch (error) {
         console.error('Error deleting sub category:', error);
         dispatch(setError('Failed to delete sub category'));

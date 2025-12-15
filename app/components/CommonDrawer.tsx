@@ -135,13 +135,20 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                         case 'dropdown':
                             return (<FormControl fullWidth variant="standard" key={prefix + column.field}>
                                 <InputLabel>{column.headerName}</InputLabel>
-                                <Select value={localData[column.field] || null}
-                                    onChange={(e) => onChangeHandler(column.field, e.target.value)}>
-                                    {column.all === undefined || column.all === true && <SelectItem value="">All</SelectItem>}
-                                    {column.options && column.options.map((option: any, index: number) => (
-                                        <SelectItem key={'op' + index} value={option}>
-                                            {column.optionLabelField ? option[column.optionLabelField] : option}
-                                        </SelectItem>
+                                <Select value={
+                                    column.optionValueField
+                                        ? localData?.[column.field]?.[column.optionValueField] ??
+                                        localData?.[column.field] ??
+                                        ""
+                                        : localData?.[column.field] ?? ""
+                                } onChange={(e) => onChangeHandler(column.field, e.target.value)}>
+                                    {(column.all === undefined || column.all === true) && (<SelectItem value="">All</SelectItem>)}
+                                    {column.options?.map((option: any, index: number) => (
+                                        <SelectItem key={`op-${index}`} value={
+                                            column.optionValueField
+                                                ? option[column.optionValueField]
+                                                : option
+                                        }>{column.optionLabelField ? option[column.optionLabelField] : option}</SelectItem>
                                     ))}
                                 </Select>
                             </FormControl>);
@@ -168,7 +175,7 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
         };
 
         return (
-            <Box sx={{ mb: 2 , border:'1px solid #dedede'}}>
+            <Box sx={{ mb: 2, border: '1px solid #dedede' }}>
                 {label && (
                     <Divider textAlign="left" sx={{ mb: 1 }}>
                         <Typography variant="subtitle2" fontWeight={600}>
