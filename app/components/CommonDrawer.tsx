@@ -95,6 +95,18 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                 return (obj);
             });
         };
+
+        const getDropdownValue = (data: any, field: string, optionValueField?: string, parent?: string) => {
+            const source = parent ? data?.[parent] : data;
+            if (!source) return "";
+            if (optionValueField) {
+                return source?.[field]?.[optionValueField] ??
+                    source?.[field] ??
+                    "";
+            }
+            return source?.[field] ?? "";
+        };
+
         return (cols?.map((column: any, idx: number) => {
             if (column) {
                 if (column.type === 'group') {
@@ -112,7 +124,7 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                     return (<>
                         <Root>
                             <Divider textAlign="center" sx={{ mt: '13px', mb: '-6px' }}>
-                                <Chip label={column.headerName} size="small" color="primary" />
+                                <Chip label={column.headerName + '-' + column.field} size="small" color="primary" />
                             </Divider>
                             {renderInput(column.fields, column.field)}
                         </Root>
@@ -126,22 +138,16 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                     switch (column.type) {
                         case 'textbox':
                             return (<TextField key={prefix + column.field} id={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal"
-                                value={localData[prefix + column.field]}
+                                value={parent && localData?.[parent]?.[column.field] !== undefined ? localData[parent][column.field] : localData?.[column.field] ?? null}
                                 onChange={(e) => onChangeHandler(column.field, e.target.value)} />);
                         case 'textarea':
                             return (<TextField key={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal" multiline rows={column.rows ? column.rows : 2}
-                                value={localData[column.field] || null}
+                                value={parent && localData?.[parent]?.[column.field] !== undefined ? localData[parent][column.field] : localData?.[column.field] ?? null}
                                 onChange={(e) => onChangeHandler(column.field, e.target.value)} />);
                         case 'dropdown':
                             return (<FormControl fullWidth variant="standard" key={prefix + column.field}>
                                 <InputLabel>{column.headerName}</InputLabel>
-                                <Select value={
-                                    column.optionValueField
-                                        ? localData?.[column.field]?.[column.optionValueField] ??
-                                        localData?.[column.field] ??
-                                        ""
-                                        : localData?.[column.field] ?? ""
-                                } onChange={(e) => onChangeHandler(column.field, e.target.value)}>
+                                <Select value={getDropdownValue(localData, column.field, column.optionValueField, parent)} onChange={(e) => onChangeHandler(column.field, e.target.value)}>
                                     {(column.all === undefined || column.all === true) && (<SelectItem value="">All</SelectItem>)}
                                     {column.options?.map((option: any, index: number) => (
                                         <SelectItem key={`op-${index}`} value={
@@ -175,7 +181,7 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
         };
 
         return (
-            <Box sx={{ mb: 2, border: '1px solid #dedede' }}>
+            <Box sx={{ mb: 2, border: '0px solid #dedede' }}>
                 {label && (
                     <Divider textAlign="left" sx={{ mb: 1 }}>
                         <Typography variant="subtitle2" fontWeight={600}>
@@ -187,10 +193,10 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                 {Object.entries(data)
                     .filter(([key]) => !skipKeys.includes(key))
                     .map(([key, value]) => {
-                        const isObject =
-                            typeof value === "object" && value !== null;
+                        const isObject = typeof value === "object" && value !== null;
+                        const isStringArray = Array.isArray(value) && value.every(item => typeof item === "string");
 
-                        if (isObject) {
+                        if (isObject && !isStringArray) {
                             return (
                                 <ObjectViewer
                                     key={key}
@@ -224,8 +230,8 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                                     {toLabel(key)}
                                 </Typography>
 
-                                <Typography variant="body2">
-                                    {String(value)}
+                                <Typography variant="body2" sx={{ whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                                    {isStringArray ? value.toString() : String(value)}
                                 </Typography>
                             </Box>
                         );

@@ -47,24 +47,24 @@ export const getAllFilterPlayers = (dispatch: Dispatch) => async () => {
   }
 };
 
-export const editCompany =
-  (dispatch: Dispatch) =>
-  async (id: number, formData: { name: string; isActive: boolean }) => {
-    try {
-      console.log("id:", id, "formdata", formData);
-      dispatch(setLoading(true));
-      const response = await axiosInstance.put(`companies/${id}`, formData);
-      dispatch(setError(null));
-      // Refresh the companies list after edit
-      await getAllActiveCompanies(dispatch, {})();
-    } catch (error) {
-      console.error("Error editing company:", error);
-      dispatch(setError("Failed to edit company"));
-      throw error;
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
+export const editCompany = (dispatch: Dispatch) => async (id: number, data: any) => {
+  try {
+    console.log("id:", id, "formdata", data);
+    let formData = { ...data };
+    delete formData.id; // Remove id from formData
+    dispatch(setLoading(true));
+    const response = await axiosInstance.patch(`companies/${id}`, formData);
+    dispatch(setError(null));
+    // Refresh the companies list after edit
+    await getAllActiveCompanies(dispatch, {})();
+  } catch (error) {
+    console.error("Error editing company:", error);
+    dispatch(setError("Failed to edit company"));
+    throw error;
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
 
 export const deleteCompany = (dispatch: Dispatch) => async (id: number) => {
   try {
@@ -83,22 +83,22 @@ export const deleteCompany = (dispatch: Dispatch) => async (id: number) => {
 };
 export const addCompany =
   (dispatch: Dispatch) =>
-  async (formData: { name: string; isActive: boolean }) => {
-    try {
-      console.log("formdata", formData);
-      dispatch(setLoading(true));
-      const response = await axiosInstance.post("companies", formData);
-      dispatch(setError(null));
-      // Refresh the companies list after adding
-      await getAllActiveCompanies(dispatch, {})();
-    } catch (error) {
-      console.error("Error adding company:", error);
-      dispatch(setError("Failed to add company"));
-      throw error;
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
+    async (formData: { name: string; isActive: boolean }) => {
+      try {
+        console.log("formdata", formData);
+        dispatch(setLoading(true));
+        const response = await axiosInstance.post("companies", formData);
+        dispatch(setError(null));
+        // Refresh the companies list after adding
+        await getAllActiveCompanies(dispatch, {})();
+      } catch (error) {
+        console.error("Error adding company:", error);
+        dispatch(setError("Failed to add company"));
+        throw error;
+      } finally {
+        dispatch(setLoading(false));
+      }
+    };
 
 export const getAllFilterPlayers1 = async (dispatch: Dispatch) => async () => {
   try {
