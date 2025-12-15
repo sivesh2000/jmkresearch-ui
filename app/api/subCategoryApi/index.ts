@@ -1,11 +1,14 @@
 import axiosInstance from "../axiosIntance"
 import { setSubCategories, setLoading, setError, setFilterPlayers } from "@/app/redux/slices/subCategorySlices/ActiveSubCategoriesSlice"
 import { Dispatch } from "@reduxjs/toolkit"
+import { parseQueryParams } from "@/app/utils/functions"
 
-export const getAllActiveSubCategories = (dispatch: Dispatch) => async () => {
+export const getAllActiveSubCategories = (dispatch: Dispatch, filters: any) => async () => {
     try {
         dispatch(setLoading(true));
-        const response = await axiosInstance.get('categories');
+        const queryParam = parseQueryParams(filters,'');
+        const url = 'categories?' + queryParam;
+        const response = await axiosInstance.get(url);
         const subCategories = response?.data?.results || []
         // console.log("subCategories", subCategories);
         // const filterSubCategories = subCategories.filter((subCategory: any) => subCategory.parentId != null);
@@ -23,7 +26,8 @@ export const getAllActiveSubCategories = (dispatch: Dispatch) => async () => {
                 // Add the parent category name as subCatName
                 return {
                     ...subCategory,
-                    subCatName: parentCategories[subCategory.parentId] || ''
+                    // subCatName: parentCategories[subCategory.parentId] || ''
+                    subCatName: subCategory.parentId.name || ''
                 };
             });
         dispatch(setSubCategories(filterSubCategories));
@@ -44,7 +48,7 @@ export const addSubCategory = (dispatch: Dispatch) => async (formData: { name: s
         const response = await axiosInstance.post('categories', formData);
         dispatch(setError(null));
         // Refresh the sub categories list after adding
-        await getAllActiveSubCategories(dispatch)();
+        await getAllActiveSubCategories(dispatch,{})();
     } catch (error) {
         console.error('Error adding sub category:', error);
         dispatch(setError('Failed to add sub category'));
@@ -54,14 +58,14 @@ export const addSubCategory = (dispatch: Dispatch) => async (formData: { name: s
     }
 }
 
-export const editSubCategory = (dispatch: Dispatch) => async (id: number, formData: { cat_id: string; name: string; isActive: boolean }) => {
+export const editSubCategory = (dispatch: Dispatch) => async (id: number, formData: { parentId: string; name: string; isActive: boolean }) => {
     try {
         console.log("id:", id, "formdata", formData);
         dispatch(setLoading(true));
-        const response = await axiosInstance.put(`categories/${id}`, formData);
+        const response = await axiosInstance.patch(`categories/${id}`, formData);
         dispatch(setError(null));
         // Refresh the sub categories list after edit
-        await getAllActiveSubCategories(dispatch)();
+        await getAllActiveSubCategories(dispatch,{})();
     } catch (error) {
         console.error('Error editing sub category:', error);
         dispatch(setError('Failed to edit sub category'));
@@ -77,7 +81,7 @@ export const deleteSubCategory = (dispatch: Dispatch) => async (id: number) => {
         const response = await axiosInstance.delete(`categories/${id}`);
         dispatch(setError(null));
         // Refresh the sub categories list after deletion
-        await getAllActiveSubCategories(dispatch)();
+        await getAllActiveSubCategories(dispatch,{})();
     } catch (error) {
         console.error('Error deleting sub category:', error);
         dispatch(setError('Failed to delete sub category'));

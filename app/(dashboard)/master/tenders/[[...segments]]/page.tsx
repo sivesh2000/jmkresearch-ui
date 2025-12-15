@@ -124,7 +124,7 @@ const Page = memo(function Page() {
     try {
       getAllActiveCompanies(dispatch, {})();
       getAllActiveTenders(dispatch, {})();
-      getAllActiveStates(dispatch)();
+      getAllActiveStates(dispatch,{})();
       getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently

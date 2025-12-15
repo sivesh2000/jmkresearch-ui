@@ -30,7 +30,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
 import { buildPayload, getCategoryPayload, getFilterPayload } from '../helper';
 import { options, set } from "jodit/esm/core/helpers";
-// import { buildPayload } from '../helper';
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
 import ColumnSelector from "@/app/components/ColumnSelector";
@@ -42,6 +41,7 @@ const Page = memo(function Page() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
+  const [searchValue, setSearchValue] = useState<String>('');
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     category_name: "",
@@ -149,7 +149,7 @@ const Page = memo(function Page() {
 
   const handleDeleteConfirm = async () => {
     try {
-      const deleteId = deleteRow.id;
+      const deleteId = deleteRow._id;
       const deleteFunction = deleteCategory(dispatch);
       await deleteFunction(deleteId);
       toast.success("Category deleted successfully!");
@@ -183,7 +183,8 @@ const Page = memo(function Page() {
       if (isEdit) {
         const editFunction = editCategory(dispatch);
         const payload = buildPayload(data);
-        await editFunction(data.id!, payload);
+        await editFunction(data._id!, payload);
+        setDrawer(false);
         toast.success("Category updated successfully!");
       } else {
         const addFunction = addCategory(dispatch);
@@ -366,44 +367,14 @@ const Page = memo(function Page() {
   return (
     <PageContainer>
       <Paper sx={{ height: "auto", width: "100%" }}>
-        <Box
-          sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}
-        >
-          <Box
-            sx={{
-              textAlign: "left",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <TextField
-              sx={{ width: "300px" }}
-              variant="standard"
-              placeholder="Category Name"
-              margin="normal"
-            />
+        <Box sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1, }}>
+            <TextField sx={{ width: "300px" }} variant="standard" placeholder="Category Name" margin="normal" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             <Box sx={{ textAlign: "right", pt: 2 }}>
-              <IconButton
-                size="small"
-                sx={{
-                  background: "#dedede",
-                  mr: 1,
-                  "&:hover": { color: "red" },
-                }}
-              >
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }) }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
-
-              <IconButton
-                size="small"
-                sx={{
-                  background: "#dedede",
-                  mr: 1,
-                  "&:hover": { color: "red" },
-                }}
-              >
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: '' }); setSearchValue(''); }}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </Box>
@@ -423,14 +394,7 @@ const Page = memo(function Page() {
             </IconButton>
           </Box>
         </Box>
-        <LazyDataGrid
-          rows={activeCategories}
-          getRowId={(row: any) => row.id}
-          columns={columns}
-          loading={isLoading}
-          paginationModel={paginationModel}
-          pageSizeOptions={[5, 10]}
-        />
+        <LazyDataGrid rows={activeCategories} getRowId={(row: any) => row._id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
       </Paper>
       <MenuComponent />
       {/* <CategoryModel /> */}
