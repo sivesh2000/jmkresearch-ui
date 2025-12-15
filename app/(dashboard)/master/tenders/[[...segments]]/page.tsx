@@ -69,6 +69,7 @@ const Page = memo(function Page() {
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editRow, setEditRow] = useState<any>(null);
   const [formData, setFormData] = useState({
     make_name: "",
     status: true,
@@ -77,8 +78,8 @@ const Page = memo(function Page() {
   const [isEdit, setIsEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
-  const [editableColumns, setEditableColumns] = useState([]);
-  const [drawerAction, setDrawerAction] = useState<'filter' | 'add' | 'edit' | 'import' | 'export'>('filter');
+  const [editableColumns, setEditableColumns] = useState<any[]>([]);
+  const [drawerAction, setDrawerAction] = useState<'filter' | 'add' | 'edit' | 'import' | 'view' | 'export'>('filter');
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
   const optionalColumns: GridColDef[] = [
@@ -116,7 +117,7 @@ const Page = memo(function Page() {
   const [filterColumns, setFilterColumns] = useState<any[]>();
   useEffect(() => {
     if (players) {
-      // setEditableColumns(getTenderPayload(activeCompanies, activeStates));
+      setEditableColumns(getTenderPayload(activeCompanies, activeStates));
       setFilterColumns(getFilterPayload(activeCompanies || [], activeStates || []));
     }
   }, [players, activeCompanies, activeStates]);
@@ -124,7 +125,7 @@ const Page = memo(function Page() {
     try {
       getAllActiveCompanies(dispatch, {})();
       getAllActiveTenders(dispatch, {})();
-      getAllActiveStates(dispatch,{})();
+      getAllActiveStates(dispatch, {})();
       getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
@@ -240,18 +241,19 @@ const Page = memo(function Page() {
   };
 
   const handleAction = (task: string) => {
+    setEditRow(selectedRow);
     if (task === "Edit") {
-      setFormData({
-        make_name: selectedRow.name,
-        status: selectedRow.isActive,
-        id: selectedRow._id,
-      });
       setIsEdit(true);
-      setModalOpen(true);
+      setDrawerAction('edit');
+      setDrawer(true);
     } else if (task === "Delete") {
       console.log("Delete", selectedRow);
       setDeleteRow(selectedRow);
       setDeleteDialogOpen(true);
+    } else if (task === "View") {
+      setDrawerAction('view');
+      setDrawer(true);
+      setIsEdit(false);
     } else {
       console.log(`${task} clicked for:`, selectedRow);
     }
@@ -640,6 +642,7 @@ const Page = memo(function Page() {
       <MenuComponent />
       <TenderModel />
       <DeleteDialog />
+      <CommonDrawer title={'View Tender Info'} isOpen={isDrawer && drawerAction === 'view'} setOpen={setDrawer} defaultValue={editRow} buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
       <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
       <CommonDrawer title={'Add New Tender'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Edit Tender'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />

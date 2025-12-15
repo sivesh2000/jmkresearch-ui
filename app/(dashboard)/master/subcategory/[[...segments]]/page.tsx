@@ -67,17 +67,16 @@ const Page = memo(function Page() {
 
   useEffect(() => {
     console.log(activeCategories, "activeCategoriesactiveCategoriesactiveCategories")
-    if (activeSubCategories) {
-      const categoryIds = (activeCategories || []).map((cat: any) => cat._id || cat.id);
-      setFilterColumns(getFilterPayload(categoryIds));
-      setEditableColumns(getSubCategoryPayload(categoryIds));
+    if (activeCategories) {
+      // const categoryIds = (activeCategories || []).map((cat: any) => cat.id || cat.id);
+      setFilterColumns(getFilterPayload(activeCategories));
+      setEditableColumns(getSubCategoryPayload(activeCategories));
     }
-  }, [activeSubCategories,activeCategories]);
+  }, [activeCategories]);
 
   const fetchSubCategories = useCallback(async () => {
     try {
       getAllActiveSubCategories(dispatch, {})();
-      // getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
       toast.error(
@@ -96,7 +95,7 @@ const Page = memo(function Page() {
     if (selCol) {
       setColumns([
         { field: "name", headerName: "Sub Category Name", flex: 1 },
-        { field: "subCatName", headerName: "Category Name", flex: 1 },
+        { field: "parentId", headerName: "Parent Name", flex: 1, renderCell: (params: any) => <>{params.value.name}</> },
         ...selCol,
         {
           field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) => params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
@@ -127,7 +126,8 @@ const Page = memo(function Page() {
   const handleAction = (task: string) => {
     console.log("Task", selectedRow)
     if (task === "Edit") {
-      setEditRow(selectedRow);
+      const parent = activeCategories.find((cat: any) => cat.name === selectedRow?.parentId?.name);
+      setEditRow({...selectedRow, parentId: parent || null });
       setDrawerAction('edit');
       setDrawer(true);
       setIsEdit(true);
