@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, memo, use } from "react";
+import React, { useState, memo, use, useEffect } from "react";
 import {
     Box, Button, IconButton, Typography, Switch,
     Divider, FormControl, InputLabel, Select,
@@ -7,11 +7,18 @@ import {
     Fade, Modal, Card, CardContent, Paper,
     Menu, MenuItem, TextField, Drawer,
     Chip, Radio, RadioGroup, FormControlLabel, FormLabel,
-    Accordion, AccordionActions, AccordionSummary, AccordionDetails
+    Accordion, AccordionActions, AccordionSummary, AccordionDetails,
+    Stack,
 } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloseIcon from "@mui/icons-material/Close";
+
+type ObjectViewerProps = {
+    data: Record<string, any>;
+    label?: string;
+    skipKeys?: string[];
+};
 
 interface CommonDrawerProps {
     setOpen?(state: boolean): void;
@@ -24,6 +31,8 @@ interface CommonDrawerProps {
     buttonCancelLabel?: string;
     buttonClearLabel?: string;
     title?: string;
+    reset?: boolean;
+    defaultValue?: any;
 }
 
 const Root = styled('div')(({ theme }) => ({
@@ -35,9 +44,19 @@ const Root = styled('div')(({ theme }) => ({
     },
 }));
 
-const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, onApply, onClear, buttonOkLabel, buttonCancelLabel, buttonClearLabel, title }: CommonDrawerProps) {
+const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, isOpen, setOpen, sx, columns, onApply, onClear, buttonOkLabel, buttonCancelLabel, buttonClearLabel, title }: CommonDrawerProps) {
     const [localData, setLocalData] = useState<any>({});
     const [formKey, setFormKey] = useState<string>('frm-0');
+
+    useEffect(() => {
+        if (defaultValue) {
+            console.log("Default Value", defaultValue)
+            setLocalData(defaultValue);
+        } else {
+            console.log("No default value")
+        }
+    }, [defaultValue])
+    useEffect(() => { if (reset) { resetForm() } }, [reset])
 
     const resetForm = () => {
         setLocalData({});
@@ -49,7 +68,12 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
 
     // const handleClear = () => { onClear?.() };
 
-    const handleClose = () => { setOpen?.(false) };
+    const handleClose = () => {
+        setLocalData({});
+        const randumNumber = Math.random();
+        setFormKey('frm-' + randumNumber);
+        setOpen?.(false)
+    };
 
     const onSubmit = (e: React.FormEvent) => { e.preventDefault(); handleApply(); }
 
@@ -102,10 +126,10 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
                     switch (column.type) {
                         case 'textbox':
                             return (<TextField key={prefix + column.field} id={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal"
-                                value={localData[prefix + column.field]} 
+                                value={localData[prefix + column.field]}
                                 onChange={(e) => onChangeHandler(column.field, e.target.value)} />);
                         case 'textarea':
-                            return (<TextField key={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal" multiline rows={4}
+                            return (<TextField key={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal" multiline rows={column.rows ? column.rows : 2}
                                 value={localData[column.field] || null}
                                 onChange={(e) => onChangeHandler(column.field, e.target.value)} />);
                         case 'dropdown':
@@ -113,7 +137,7 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
                                 <InputLabel>{column.headerName}</InputLabel>
                                 <Select value={localData[column.field] || null}
                                     onChange={(e) => onChangeHandler(column.field, e.target.value)}>
-                                    <SelectItem value="">All</SelectItem>
+                                    {column.all === undefined || column.all === true && <SelectItem value="">All</SelectItem>}
                                     {column.options && column.options.map((option: any, index: number) => (
                                         <SelectItem key={'op' + index} value={option}>
                                             {column.optionLabelField ? option[column.optionLabelField] : option}
@@ -133,6 +157,75 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
 
         }));
     }
+
+    const ObjectViewer: React.FC<ObjectViewerProps> = ({ data, label, skipKeys = [] }) => {
+        let rowIndex = 0;
+        const toLabel = (key: string): string => {
+            return key
+                .replace(/_/g, " ")
+                .replace(/([a-z])([A-Z])/g, "$1 $2")
+                .replace(/\b\w/g, char => char.toUpperCase());
+        };
+
+        return (
+            <Box sx={{ mb: 2 , border:'1px solid #dedede'}}>
+                {label && (
+                    <Divider textAlign="left" sx={{ mb: 1 }}>
+                        <Typography variant="subtitle2" fontWeight={600}>
+                            {toLabel(label)}
+                        </Typography>
+                    </Divider>
+                )}
+
+                {Object.entries(data)
+                    .filter(([key]) => !skipKeys.includes(key))
+                    .map(([key, value]) => {
+                        const isObject =
+                            typeof value === "object" && value !== null;
+
+                        if (isObject) {
+                            return (
+                                <ObjectViewer
+                                    key={key}
+                                    data={value}
+                                    label={key}
+                                    skipKeys={skipKeys}
+                                />
+                            );
+                        }
+
+                        const isStriped = rowIndex++ % 2 === 0;
+
+                        return (
+                            <Box
+                                key={key}
+                                sx={{
+                                    display: "flex",
+                                    px: 2,
+                                    py: 1,
+                                    borderRadius: 1,
+                                    backgroundColor: isStriped
+                                        ? "action.hover"
+                                        : "transparent",
+                                }}
+                            >
+                                <Typography
+                                    variant="body2"
+                                    fontWeight={600}
+                                    sx={{ minWidth: 160 }}
+                                >
+                                    {toLabel(key)}
+                                </Typography>
+
+                                <Typography variant="body2">
+                                    {String(value)}
+                                </Typography>
+                            </Box>
+                        );
+                    })}
+            </Box>
+        );
+    }
     return (<div>
         <Drawer anchor="right" open={isOpen} onClose={() => handleClose()}
             sx={{
@@ -150,14 +243,15 @@ const CommonDrawer = memo(function CommonDrawer({ isOpen, setOpen, sx, columns, 
             </Box>
             <Box sx={{ height: 'calc(100vh - 100px)', overflow: 'auto', gap: 1 }}>
                 {/* Filter Form */}
-                <form onSubmit={onSubmit} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }} key={formKey}>
+                {columns && <form onSubmit={onSubmit} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }} key={formKey}>
                     {renderInput(columns, '')}
                     <Box sx={{ display: "flex", gap: 1, mt: 2, bgcolor: "background.paper", pt: 2, }}>
-                        <Button type="submit" variant="contained" className="button-primary button-common" fullWidth>{buttonOkLabel ? buttonOkLabel : 'OK'}</Button>
+                        {buttonOkLabel && <Button type="submit" variant="contained" className="button-primary button-common" fullWidth>{buttonOkLabel ? buttonOkLabel : 'OK'}</Button>}
                         {buttonClearLabel && <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={resetForm}>Clear</Button>}
-                        {!buttonClearLabel && buttonCancelLabel && <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={() => handleClose()}>{buttonCancelLabel ? buttonCancelLabel : 'Cancel'}</Button>}
+                        {!buttonClearLabel && buttonCancelLabel && <Button type="button" variant="outlined" className="button-common buttonColor" fullWidth onClick={handleClose}>{buttonCancelLabel ? buttonCancelLabel : 'Cancel'}</Button>}
                     </Box>
-                </form>
+                </form>}
+                {(!columns && defaultValue) && <ObjectViewer data={defaultValue} skipKeys={["id"]} />}
             </Box>
         </Drawer>
     </div >);

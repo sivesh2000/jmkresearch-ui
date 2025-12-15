@@ -8,20 +8,20 @@ const getBaseURL = () => {
   if (typeof window !== "undefined") {
     if (process.env.NODE_ENV === "production") {
       return (
-        process.env.NEXT_PUBLIC_BASE_API_URL || "http://52.66.166.61:3000/v1/"
+        process.env.NEXT_PUBLIC_BASE_API_URL || "http://localhost:3000/v1/"
       );
     }
 
-    return "http://52.66.166.61:3000/v1/";
+    return "http://localhost:3000/v1/";
   }
 
   // For server-side requests, use the private URL
 
   if (process.env.NODE_ENV === "production") {
-    return process.env.BASE_API_URL || "http://172.31.15.172:3000/v1/";
+    return process.env.BASE_API_URL || "http://localhost:3000/v1/";
   }
 
-  return "http://172.31.15.172:3000/v1/";
+  return "http://localhost:3000/v1/";
 };
 
 const axiosInstance = axios.create({

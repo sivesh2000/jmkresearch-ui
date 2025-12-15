@@ -143,9 +143,7 @@ const Page = memo(function Page() {
     }
   }, [dispatch]);
 
-  useEffect(() => {
-    fetcCompanies();
-  }, []);
+  useEffect(() => {fetcCompanies();}, [fetcCompanies]);
 
   useEffect(() => {
     // console.log("Active Makes:", activeCompanies);
@@ -310,16 +308,14 @@ const Page = memo(function Page() {
         const addFunction = addCompany(dispatch);
         const payload = buildPayload(data);
         const resp = await addFunction(payload);
-        console.log("resp", resp);
+        console.log("resp", payload);
         setDrawer(false);
         toast.success("Company created successfully!");
       }
       handleModalClose();
     } catch (err) {
-      toast.error(
-        "Operation failed. Please try again." +
-          (err as any).response.data.message || ""
-      );
+      console.log("Error", err);
+      toast.error("Operation failed. Please try again." + (err as any).response.data.message || "");
     }
   };
 

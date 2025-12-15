@@ -3,6 +3,8 @@ import React, { useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
 import { NextAppProvider } from "@toolpad/core/nextjs";
 import { usePermissions } from "@/app/utils/permissions";
+import Link from "next/link";
+import Image from "next/image";
 import {
   USERS_VIEW,
   MODEL_VIEW,
@@ -39,6 +41,7 @@ interface OptimizedLayoutProps {
   theme: any;
 }
 
+
 const getBranding = (session: any) => ({
   title: '',
   logo: (
@@ -49,8 +52,15 @@ const getBranding = (session: any) => ({
         justifyContent: "space-between",
         gap: 12,
       }}
-    >
-      <img src="/logo.png" alt="JMK Logo" style={{ height: 40 }} />
+    ><Link href="/" aria-label="Home">
+        <Image
+          src="/logo.png"
+          alt="JMK Logo"
+          width={120}
+          height={40}
+          priority
+        />
+      </Link>
     </div>
   ),
 });

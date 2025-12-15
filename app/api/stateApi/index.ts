@@ -1,5 +1,7 @@
 import axiosInstance from "../axiosIntance";
-import { setLoading, setStates, setError } from "../../redux/slices/stateSlices/stateSlice";
+// import { setLoading, setStates, setError } from "../../redux/slices/stateSlices/stateSlice";
+import { setLoading, setStates, setError } from "../../redux/slices/stateSlices/ActiveStatesSlice";
+
 import { Dispatch } from "@reduxjs/toolkit";
 
 // export const getAllStateData = (dispatch: Dispatch) => async () => {
@@ -20,8 +22,8 @@ export const getAllActiveStates = (dispatch: Dispatch) => async () => {
     try {
         dispatch(setLoading(true));
         const response = await axiosInstance.get('states');
-        const states = response?.data || []
-        dispatch(setStates(states));
+        const activeStatesArray = response?.data || []
+        dispatch(setStates(activeStatesArray));
         dispatch(setError(null));
     } catch (error) {
         console.error('Error fetching states:', error);

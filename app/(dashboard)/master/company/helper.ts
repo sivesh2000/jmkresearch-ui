@@ -25,6 +25,8 @@ const defaultPayload = {
     isActive: true
 };
 export const buildPayload = (input: any) => {
+    console.log("inputs", input)
+    // const 
     return {
         ...defaultPayload,
         ...input,
@@ -45,7 +47,9 @@ export const buildPayload = (input: any) => {
 
         businessDetails: {
             ...defaultPayload.businessDetails,
-            ...(input.businessDetails || {})
+            ...(input.businessDetails || {}),
+            ['certifications']: input?.businessDetails?.certifications?.split(',') || []
+
         }
     };
 };
