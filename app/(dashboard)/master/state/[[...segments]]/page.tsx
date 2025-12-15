@@ -53,9 +53,11 @@ import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
+import { buildPayload, getStatePayload, getFilterPayload } from "../helper";
 import { options, set } from "jodit/esm/core/helpers";
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
+import ColumnSelector from "@/app/components/ColumnSelector";
 
 interface ColSelectorProps {
   options: GridColDef[];
@@ -71,9 +73,10 @@ const Page = memo(function Page() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
+  const [searchValue, setSearchValue] = useState<String>('');
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    state_name: "",
+    name: "",
     code: "",
     status: true,
     id: null,
@@ -81,64 +84,33 @@ const Page = memo(function Page() {
   const [isEdit, setIsEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
-  const [drawerAction, setDrawerAction] = useState<
-    "filter" | "add" | "edit" | "import" | "export"
-  >("filter");
+  const [drawerAction, setDrawerAction] = useState<"filter" | "add" | "edit" | "view" | "import" | "export">("filter");
   const open = Boolean(anchorEl);
 
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
+  const [filterColumns, setFilterColumns] = useState<any[]>();
+  const [editableColumns, setEditableColumns] = useState<any[]>([]);
+  const [editRow, setEditRow] = useState<any>();
+
   const optionalColumns: GridColDef[] = [
-    { field: "updatedAt", headerName: "Updated", flex: 1 },
-    {
-      field: "isVerified",
-      headerName: "Verification",
-      flex: 1,
-      renderCell: (params: any) =>
-        params.value ? (
-          <Chip
-            label="Active"
-            color="success"
-            size="small"
-            variant="outlined"
-          />
-        ) : (
-          <Chip
-            label="Inactive"
-            size="small"
-            color="default"
-            variant="outlined"
-          />
-        ),
-    },
+    { field: "code", headerName: "Code", flex: 1 },
   ];
 
-  const filterColumns: any[] = [
-    { field: "name", headerName: "State Name", type: "textbox" },
-    { field: "code", headerName: "State Code", type: "textbox" },
-    // { field: "status", headerName: "Status", type: 'switch' },
-    // { field: "playerType",multiple:true, headerName: "Player Type", type: 'dropdown', options: players || [], optionLabelField: null, optionValueField: null },
-    {
-      field: "isActive",
-      headerName: "Status",
-      type: "dropdown",
-      options: [
-        { key: "Active", value: true },
-        { key: "In-Active", value: false },
-      ],
-      optionLabelField: "key",
-      optionValueField: "value",
-    },
-  ];
+  useEffect(() => {
+    console.log("Active Makes:", activeStates);
+    if (activeStates) {
+      setFilterColumns(getFilterPayload(players || []));
+      setEditableColumns(getStatePayload(players || []));
+    }
+  }, [activeStates, players]);
 
   const fetchStates = useCallback(async () => {
     try {
-      getAllActiveStates(dispatch)();
+      getAllActiveStates(dispatch, {})();
       // getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
-      toast.error(
-        "Failed to fetch state/filters." + (error as any).response || ""
-      );
+      toast.error("Failed to fetch state/filters." + (error as any).response || "");
     }
   }, [dispatch]);
 
@@ -146,72 +118,16 @@ const Page = memo(function Page() {
     fetchStates();
   }, [fetchStates]);
 
-  useEffect(() => {
-    console.log("Active Makes:", activeStates);
-  }, [activeStates]);
-
-  const [columns, setColumns] = useState<GridColDef[]>([
-    { field: "name", headerName: "State Name", flex: 1 },
-    { field: "code", headerName: "State Code", flex: 1 },
-    {
-      field: "isActive",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params: any) =>
-        params.value ? (
-          <Chip
-            label="Active"
-            color="success"
-            size="small"
-            variant="outlined"
-          />
-        ) : (
-          <Chip
-            label="Inactive"
-            size="small"
-            color="default"
-            variant="outlined"
-          />
-        ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 100,
-      renderCell: (params) => (
-        <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
-          <MoreVertIcon color="action" />
-        </IconButton>
-      ),
-    },
-  ]);
+  const [columns, setColumns] = useState<GridColDef[]>([]);
 
   useEffect(() => {
     if (selCol) {
       setColumns([
         { field: "name", headerName: "State Name", flex: 1 },
-        { field: "code", headerName: "State Code", flex: 1 },
+        // { field: "code", headerName: "State Code", flex: 1 },
         ...selCol,
         {
-          field: "isActive",
-          headerName: "Status",
-          flex: 1,
-          renderCell: (params: any) =>
-            params.value ? (
-              <Chip
-                label="Active"
-                color="success"
-                size="small"
-                variant="outlined"
-              />
-            ) : (
-              <Chip
-                label="Inactive"
-                size="small"
-                color="default"
-                variant="outlined"
-              />
-            ),
+          field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) => params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
         },
         {
           field: "actions",
@@ -241,17 +157,23 @@ const Page = memo(function Page() {
 
   const handleAction = (task: string) => {
     if (task === "Edit") {
-      setFormData({
-        state_name: selectedRow.name,
-        code: selectedRow.code,
-        status: selectedRow.isActive,
-        id: selectedRow._id,
-      });
+      // setFormData({
+      //   state_name: selectedRow.name,
+      //   code: selectedRow.code,
+      //   status: selectedRow.isActive,
+      //   id: selectedRow._id,
+      // });
+      setEditRow(selectedRow);
+      setDrawerAction('edit');
+      setDrawer(true);
       setIsEdit(true);
-      setModalOpen(true);
     } else if (task === "Delete") {
       setDeleteRow(selectedRow);
       setDeleteDialogOpen(true);
+    } else if (task === "View") {
+      setEditRow(selectedRow);
+      setDrawerAction('view');
+      setDrawer(true);
     } else {
       console.log(`${task} clicked for:`, selectedRow);
     }
@@ -280,26 +202,20 @@ const Page = memo(function Page() {
 
   const handleModalClose = () => {
     setModalOpen(false);
-    setFormData({ state_name: "", code: "", status: true, id: null });
+    setFormData({ name: "", code: "", status: true, id: null });
   };
 
   const handleSave = async (data: any) => {
     try {
       if (isEdit) {
         const editFunction = editState(dispatch);
-        await editFunction(formData.id!, {
-          name: formData.state_name,
-          code: formData.code,
-          isActive: formData.status,
-        });
+        const payload = buildPayload(data);
+        await editFunction(data._id!, payload);
+        setDrawer(false);
         toast.success("State updated successfully!");
       } else {
         const addFunction = addState(dispatch);
-        const payload = {
-          name: data?.name,
-          code: data?.code,
-          isActive: true,
-        };
+        const payload = buildPayload(data);
         const resp = await addFunction(payload);
         console.log("Response", resp);
         setDrawer(false);
@@ -307,32 +223,26 @@ const Page = memo(function Page() {
       }
       handleModalClose();
     } catch (err) {
-      toast.error(
-        "Operation failed. Please try again." +
-        (err as any).response.data.message || ""
-      );
+      toast.error("Operation failed. Please try again." + (err as any).response.data.message || "");
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  // const handleInputChange = (field: string, value: any) => {
+  //   setFormData((prev) => ({ ...prev, [field]: value }));
+  // };
 
   const handleFilter = (params: any) => {
     console.log("Params", params);
+    getAllActiveStates(dispatch, params)();
     setDrawer(false);
   };
 
   const MenuComponent = () => {
     return (
       <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
-        <MenuItem onClick={() => handleAction("Edit")}> View</MenuItem>
-
+        <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
         <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
-
-        <MenuItem onClick={() => handleAction("Edit")}>Delete</MenuItem>
-
-        {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
+        <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
       </Menu>
     );
   };
@@ -348,18 +258,10 @@ const Page = memo(function Page() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            variant="outlined"
-            onClick={handleDeleteCancel}
-            className="button-common buttonColor"
-          >
+          <Button variant="outlined" onClick={handleDeleteCancel} className="button-common buttonColor">
             Cancel
           </Button>
-          <Button
-            onClick={handleDeleteConfirm}
-            className="button-common button-primary"
-            variant="contained"
-          >
+          <Button onClick={handleDeleteConfirm} className="button-common button-primary" variant="contained">
             Delete
           </Button>
         </DialogActions>
@@ -374,11 +276,7 @@ const Page = memo(function Page() {
     setDrawer(true);
   };
 
-  const ColSelector: React.FC<ColSelectorProps> = ({
-    options,
-    selCol,
-    setSelCol,
-  }) => {
+  const ColSelector: React.FC = ({ options, selCol, setSelCol }: any) => {
     const [viewCols, setViewCols] = useState(false);
     const [checked, setChecked] = useState<any[]>(selCol || []);
 
@@ -404,49 +302,19 @@ const Page = memo(function Page() {
           </IconButton>
         </Tooltip>
         <Modal open={viewCols} onClose={() => setViewCols(false)}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: { xs: 0, sm: "50%" },
-              left: { xs: 0, sm: "50%" },
-              transform: { xs: "none", sm: "translate(-50%, -50%)" },
-              width: { xs: "100vw", sm: 400 },
-              height: { xs: "100vh", sm: "auto" },
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              p: { xs: 2, sm: 4 },
-              borderRadius: { xs: 0, sm: 2 },
-              overflow: "auto",
-            }}
-          >
+          <Box sx={{ position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" }, width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 }, borderRadius: { xs: 0, sm: 2 }, overflow: "auto", }}>
             <Typography variant="h6" mb={3}>
               Select Columns
             </Typography>
 
-            <List
-              sx={{
-                width: "100%",
-                maxWidth: 360,
-                bgcolor: "background.paper",
-                position: "relative",
-                overflow: "auto",
-                maxHeight: 300,
-                "& ul": { padding: 0 },
-              }}
-            >
+            <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", position: "relative", overflow: "auto", maxHeight: 300, "& ul": { padding: 0 }, }}>
               {options.map((e: GridColDef) => {
                 const labelId = `checkbox-list-label-${e.field}`;
                 return (
                   <ListItem key={e.field} disablePadding>
                     <ListItemButton onClick={() => handleToggle(e)} dense>
                       <ListItemIcon>
-                        <Checkbox
-                          edge="start"
-                          checked={checked.includes(e)}
-                          tabIndex={-1}
-                          disableRipple
-                          inputProps={{ "aria-labelledby": labelId }}
-                        />
+                        <Checkbox edge="start" checked={checked.includes(e)} tabIndex={-1} disableRipple inputProps={{ "aria-labelledby": labelId }} />
                       </ListItemIcon>
                       <ListItemText id={labelId} primary={e.headerName} />
                     </ListItemButton>
@@ -456,24 +324,10 @@ const Page = memo(function Page() {
             </List>
 
             <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-              <Button
-                className="button-common button-primary"
-                variant="contained"
-                fullWidth
-                onClick={() => {
-                  console.log("Selected", checked);
-                  setSelCol(checked);
-                  // setViewCols(false);
-                }}
-              >
+              <Button className="button-common button-primary" variant="contained" fullWidth onClick={() => { console.log("Selected", checked); setSelCol(checked); }}>
                 OK
               </Button>
-              <Button
-                className="button-common buttonColor"
-                variant="outlined"
-                fullWidth
-                onClick={() => setViewCols(false)}
-              >
+              <Button className="button-common buttonColor" variant="outlined" fullWidth onClick={() => setViewCols(false)}>
                 Cancel
               </Button>
             </Box>
@@ -486,76 +340,26 @@ const Page = memo(function Page() {
   return (
     <PageContainer>
       <Paper sx={{ height: "auto", width: "100%" }}>
-        <Box
-          sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}
-        >
-          <Box
-            sx={{
-              textAlign: "left",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <TextField
-              sx={{ width: "300px" }}
-              variant="standard"
-              placeholder="State Name"
-              margin="normal"
-            />
+        <Box sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1, }}>
+            <TextField sx={{ width: "300px" }} variant="standard" placeholder="State Name" margin="normal" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             <Box sx={{ textAlign: "right", pt: 2 }}>
-              <IconButton
-                size="small"
-                sx={{
-                  background: "#dedede",
-                  mr: 1,
-                  "&:hover": { color: "red" },
-                }}
-              >
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }) }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
-
-              <IconButton
-                size="small"
-                sx={{
-                  background: "#dedede",
-                  mr: 1,
-                  "&:hover": { color: "red" },
-                }}
-              >
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: '' }); setSearchValue(''); }}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </Box>
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
-            <ColSelector
-              options={optionalColumns}
-              selCol={selCol}
-              setSelCol={setSelCol}
-            />
-
-            <IconButton
-              size="small"
-              sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }}
-              onClick={() => onActionClicked("add")}
-            >
+            <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
+            <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
               <AddIcon fontSize="small" />
             </IconButton>
-
-            <ExportData
-              dataArray={activeStates}
-              type={"button"}
-              columns={columns}
-            />
-
+            <ExportData dataArray={activeStates} type={"button"} columns={columns} />
             <ImportData title="Import Data" />
-
-            <IconButton
-              size="small"
-              sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }}
-              onClick={() => onActionClicked("filter")}
-            >
+            <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => onActionClicked("filter")}>
               <Filter1OutlinedIcon fontSize="small" />
             </IconButton>
           </Box>
@@ -571,50 +375,12 @@ const Page = memo(function Page() {
       </Paper>
       <MenuComponent />
       <DeleteDialog />
-      <CommonDrawer
-        title={"Filter Options"}
-        isOpen={isDrawer && drawerAction === "filter"}
-        setOpen={setDrawer}
-        columns={filterColumns}
-        onApply={handleFilter}
-        buttonOkLabel="Apply Filter"
-        buttonCancelLabel="Cancel"
-      />
-      <CommonDrawer
-        title={"Add New State"}
-        isOpen={isDrawer && drawerAction === "add"}
-        setOpen={setDrawer}
-        columns={filterColumns}
-        onApply={handleSave}
-        buttonOkLabel="Add"
-        buttonCancelLabel="Cancel"
-      />
-      <CommonDrawer
-        title={"Edit State"}
-        isOpen={isDrawer && drawerAction === "edit"}
-        setOpen={setDrawer}
-        columns={filterColumns}
-        onApply={handleSave}
-        buttonOkLabel="Update"
-        buttonCancelLabel="Cancel"
-      />
-      <CommonDrawer
-        title={"Import Data"}
-        isOpen={isDrawer && drawerAction === "import"}
-        setOpen={setDrawer}
-        columns={filterColumns}
-        onApply={handleFilter}
-        buttonOkLabel="Import"
-        buttonCancelLabel="Cancel"
-      />
-      <CommonDrawer
-        title={"Export Data"}
-        isOpen={isDrawer && drawerAction === "export"}
-        setOpen={setDrawer}
-        columns={filterColumns}
-        onApply={handleFilter}
-        buttonOkLabel="Export"
-        buttonCancelLabel="Cancel"
+      <CommonDrawer title={"State Details"} isOpen={isDrawer && drawerAction === "view"} setOpen={setDrawer} defaultValue={editRow} />
+      <CommonDrawer title={"Filter Options"} isOpen={isDrawer && drawerAction === "filter"} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={"Add New State"} isOpen={isDrawer && drawerAction === "add"} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={"Edit State"} isOpen={isDrawer && drawerAction === "edit"} setOpen={setDrawer} columns={editableColumns} defaultValue={editRow} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={"Import Data"} isOpen={isDrawer && drawerAction === "import"} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Import" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={"Export Data"} isOpen={isDrawer && drawerAction === "export"} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Export" buttonCancelLabel="Cancel"
       />
     </PageContainer>
   );
