@@ -17,13 +17,17 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Filter1OutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import "../../../../global.css";
-import { getAllActiveCategories, addCategory, editCategory, deleteCategory, } from "@/app/api/categoryApi";
+import {
+  getAllActiveCategories,
+  addCategory,
+  editCategory,
+  deleteCategory,
+} from "@/app/api/categoryApi";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
-import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { buildPayload, getCategoryPayload, getFilterPayload } from '../helper';
 import { options, set } from "jodit/esm/core/helpers";
 import ExportData from "@/app/components/ExportData";
@@ -39,7 +43,13 @@ const Page = memo(function Page() {
   const [deleteRow, setDeleteRow] = useState<any>(null);
   const [searchValue, setSearchValue] = useState<String>('');
   const [modalOpen, setModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ category_name: "", slug: "", description: "", status: true, id: null, });
+  const [formData, setFormData] = useState({
+    category_name: "",
+    slug: "",
+    description: "",
+    status: true,
+    id: null,
+  });
   const [isEdit, setIsEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
@@ -47,7 +57,7 @@ const Page = memo(function Page() {
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
   const [filterColumns, setFilterColumns] = useState<any[]>();
-  const [editableColumns, setEditableColumns] = useState([]);
+  const [editableColumns, setEditableColumns] = useState<any[]>([]);
   const [editRow, setEditRow] = useState<any>();
   const optionalColumns: GridColDef[] = [
     { field: "slug", headerName: "Slug", flex: 1 },
@@ -61,7 +71,7 @@ const Page = memo(function Page() {
       setFilterColumns(getFilterPayload(players || []));
       setEditableColumns(getCategoryPayload(players || []));
     }
-  }, [activeCategories]);
+  }, [activeCategories, players]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -77,7 +87,7 @@ const Page = memo(function Page() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   useEffect(() => {
     // console.log("Active Makes:", activeCategories);
@@ -159,7 +169,13 @@ const Page = memo(function Page() {
 
   const handleModalClose = () => {
     setModalOpen(false);
-    setFormData({ category_name: "", slug: "", description: "", status: true, id: null });
+    setFormData({
+      category_name: "",
+      slug: "",
+      description: "",
+      status: true,
+      id: null,
+    });
   };
 
   const handleSave = async (data: any) => {
@@ -197,15 +213,15 @@ const Page = memo(function Page() {
     return (
       <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
         {/* <MenuItem onClick={() => handleAction('View')}>View</MenuItem> */}
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
-        </PermissionCheck>
+        {/* <PermissionCheck action={OEM_EDIT}> */}
+        <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
+        {/* </PermissionCheck> */}
+        {/* <PermissionCheck action={OEM_EDIT}> */}
+        <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
+        {/* </PermissionCheck> */}
+        {/* <PermissionCheck action={OEM_EDIT}> */}
+        <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
+        {/* </PermissionCheck> */}
         {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
       </Menu>
     );
@@ -222,10 +238,18 @@ const Page = memo(function Page() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="outlined" onClick={handleDeleteCancel} className="button-common buttonColor">
+          <Button
+            variant="outlined"
+            onClick={handleDeleteCancel}
+            className="button-common buttonColor"
+          >
             Cancel
           </Button>
-          <Button onClick={handleDeleteConfirm} className="button-common button-primary" variant="contained">
+          <Button
+            onClick={handleDeleteConfirm}
+            className="button-common button-primary"
+            variant="contained"
+          >
             Delete
           </Button>
         </DialogActions>
@@ -240,7 +264,11 @@ const Page = memo(function Page() {
     setDrawer(true);
   };
 
-  const ColSelector: React.FC = ({ options, selCol, setSelCol }: any) => {
+  const ColSelector: React.FC<any> = ({
+    options,
+    selCol,
+    setSelCol,
+  }) => {
     const [viewCols, setViewCols] = useState(false);
     const [checked, setChecked] = useState<any[]>(selCol || []);
 
@@ -257,24 +285,58 @@ const Page = memo(function Page() {
     return (
       <>
         <Tooltip title="Columns selection" placement="top">
-          <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => setViewCols(true)}>
+          <IconButton
+            size="small"
+            sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }}
+            onClick={() => setViewCols(true)}
+          >
             <SettingsIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Modal open={viewCols} onClose={() => setViewCols(false)}>
-          <Box sx={{ position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" }, width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 }, borderRadius: { xs: 0, sm: 2 }, overflow: "auto", }}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: { xs: 0, sm: "50%" },
+              left: { xs: 0, sm: "50%" },
+              transform: { xs: "none", sm: "translate(-50%, -50%)" },
+              width: { xs: "100vw", sm: 400 },
+              height: { xs: "100vh", sm: "auto" },
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: { xs: 2, sm: 4 },
+              borderRadius: { xs: 0, sm: 2 },
+              overflow: "auto",
+            }}
+          >
             <Typography variant="h6" mb={3}>
               Select Columns
             </Typography>
 
-            <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", position: "relative", overflow: "auto", maxHeight: 300, "& ul": { padding: 0 }, }}>
+            <List
+              sx={{
+                width: "100%",
+                maxWidth: 360,
+                bgcolor: "background.paper",
+                position: "relative",
+                overflow: "auto",
+                maxHeight: 300,
+                "& ul": { padding: 0 },
+              }}
+            >
               {options.map((e: GridColDef) => {
                 const labelId = `checkbox-list-label-${e.field}`;
                 return (
                   <ListItem key={e.field} disablePadding>
                     <ListItemButton onClick={() => handleToggle(e)} dense>
                       <ListItemIcon>
-                        <Checkbox edge="start" checked={checked.includes(e)} tabIndex={-1} disableRipple inputProps={{ "aria-labelledby": labelId }} />
+                        <Checkbox
+                          edge="start"
+                          checked={checked.includes(e)}
+                          tabIndex={-1}
+                          disableRipple
+                          inputProps={{ "aria-labelledby": labelId }}
+                        />
                       </ListItemIcon>
                       <ListItemText id={labelId} primary={e.headerName} />
                     </ListItemButton>
@@ -287,7 +349,12 @@ const Page = memo(function Page() {
               <Button className="button-common button-primary" variant="contained" fullWidth onClick={() => { console.log("Selected", checked); setSelCol(checked); }}>
                 OK
               </Button>
-              <Button className="button-common buttonColor" variant="outlined" fullWidth onClick={() => setViewCols(false)}>
+              <Button
+                className="button-common buttonColor"
+                variant="outlined"
+                fullWidth
+                onClick={() => setViewCols(false)}
+              >
                 Cancel
               </Button>
             </Box>
@@ -304,7 +371,7 @@ const Page = memo(function Page() {
           <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1, }}>
             <TextField sx={{ width: "300px" }} variant="standard" placeholder="Category Name" margin="normal" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             <Box sx={{ textAlign: "right", pt: 2 }}>
-              <IconButton variant="contained" size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }) }}>
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }) }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
               <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: '' }); setSearchValue(''); }}>
@@ -317,17 +384,11 @@ const Page = memo(function Page() {
               <SettingsIcon fontSize="small" />
             </IconButton> */}
             <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
-            <PermissionCheck action={OEM_ADD}>
-              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
-                <AddIcon fontSize="small" />
-              </IconButton>
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ExportData dataArray={activeCategories} type={'button'} columns={columns} />
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ImportData title="Import Data" />
-            </PermissionCheck>
+            <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
+              <AddIcon fontSize="small" />
+            </IconButton>
+            <ExportData dataArray={activeCategories} type={'button'} columns={columns} />
+            <ImportData title="Import Data" />
             <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => onActionClicked("filter")}>
               <Filter1OutlinedIcon fontSize="small" />
             </IconButton>

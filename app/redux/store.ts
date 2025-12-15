@@ -1,10 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import modelReducer from "./slices/modelSlices/modelSlice";
 import allUserReducer from "./slices/userSlices/allUserSlice";
-import makeReducer from "./slices/makeSlices/ActiveMakesSlice";
-import filterMakesReducer from "./slices/makeSlices/filterMakesSlice";
-import modelFilterReducer from "./slices/modelSlices/modelFilterSlice";
-// import stateReducer from "./slices/stateSlices/stateSlice";
 import cityReducer from "./slices/citySlices/citySlice";
 import districtReducer from "./slices/districtSlice";
 import userDataReducer from "./slices/userSlices/UserDataSlice";
@@ -18,15 +13,11 @@ import companyReducer from "./slices/companySlices/ActiveCompaniesSlice";
 import categoryReducer from "./slices/categorySlices/ActiveCategoriesSlice";
 import subCategoryReducer from "./slices/subCategorySlices/ActiveSubCategoriesSlice";
 import stateReducer from "./slices/stateSlices/ActiveStatesSlice";
-import tenderReducer from './slices/tenderSlice/ActiveTenderSlice';
+import tenderReducer from "./slices/tenderSlice/ActiveTenderSlice";
 
 export const store = configureStore({
   reducer: {
-    activeMakes: makeReducer,
-    filterModelData: filterMakesReducer,
-    modelData: modelReducer,
     allUsers: allUserReducer,
-    modelFilter: modelFilterReducer,
     // stateData: stateReducer,
     cityData: cityReducer,
     districtData: districtReducer,
@@ -41,7 +32,7 @@ export const store = configureStore({
     activeCategories: categoryReducer,
     activeSubCategories: subCategoryReducer,
     activeStates: stateReducer,
-    activeTenders: tenderReducer
+    activeTenders: tenderReducer,
   },
 });
 

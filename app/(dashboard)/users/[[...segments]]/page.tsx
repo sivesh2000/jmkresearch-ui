@@ -44,7 +44,6 @@ import {
   updateUser,
   deleteUsers,
   createUser,
-  getLocationsByMasterDealer,
   assignRolesToUser,
   getAllRolesUser,
 } from "@/app/api/usersApi";
@@ -214,20 +213,28 @@ const Page = memo(function Page() {
   // Add state for user type radio
 
   const fetchUsers = useCallback(async () => {
-    if (session?.user?.id !== undefined && session?.user?.id !== null) {
-      try {
-        await getAllUsers(dispatch, {
-          userType: "user",
-          page: paginationModel.page + 1,
-          limit: paginationModel.pageSize,
-          mainDealerRef: filterForm.mainDealerRef,
-          search: filterForm.search,
-        });
-      } catch {
-        // Handle error silently
-      }
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    try {
+      await getAllUsers(dispatch, {
+        userType: "user",
+        page: paginationModel.page + 1,
+        limit: paginationModel.pageSize,
+        mainDealerRef: filterForm.mainDealerRef,
+        search: filterForm.search,
+      });
+    } catch (error) {
+      // handle error silently
     }
-  }, [session?.user?.id, dispatch, paginationModel, userTypeRadio]);
+  }, [
+    session?.user?.id,
+    dispatch,
+    paginationModel.page,
+    paginationModel.pageSize,
+    filterForm.mainDealerRef,
+    filterForm.search,
+  ]);
 
   useEffect(() => {
     fetchUsers();
@@ -248,30 +255,30 @@ const Page = memo(function Page() {
       // Only show Master Dealer Name column if userTypeRadio is "dealer"
       ...(userTypeRadio === "dealer"
         ? [
-            {
-              field: "mainDealerRef",
-              headerName: "Master Dealer Name",
-              flex: 1,
-              renderCell: (params: GridRenderCellParams) =>
-                params.row.mainDealerRef?.name || "",
-            },
-          ]
+          {
+            field: "mainDealerRef",
+            headerName: "Master Dealer Name",
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) =>
+              params.row.mainDealerRef?.name || "",
+          },
+        ]
         : []),
       { field: "name", headerName: "Name", flex: 1 },
       { field: "email", headerName: "Email", flex: 1 },
       { field: "contactPersonMobile", headerName: "Mobile Number", flex: 1 },
       // Only show Location column if not super_admin or custom
       ...(session?.user?.userType !== "super_admin" &&
-      session?.user?.userType !== "custom"
+        session?.user?.userType !== "custom"
         ? [
-            {
-              field: "location",
-              headerName: "Location",
-              flex: 1,
-              renderCell: (params: GridRenderCellParams) =>
-                params.row.locationRef?.title || "",
-            },
-          ]
+          {
+            field: "location",
+            headerName: "Location",
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) =>
+              params.row.locationRef?.title || "",
+          },
+        ]
         : []),
       {
         field: "status",
@@ -296,75 +303,75 @@ const Page = memo(function Page() {
       },
       // Add Invoice Permission column only for main_dealer
       ...(session?.user?.userType === "main_dealer" ||
-      session?.user?.userType === "super_admin" ||
-      session?.user?.userType === "custom"
+        session?.user?.userType === "super_admin" ||
+        session?.user?.userType === "custom"
         ? [
-            {
-              field: "isInvoiceEnabled",
-              headerName: "Invoice Permission",
-              flex: 1,
-              renderCell: (params: GridRenderCellParams) => (
-                <Switch
-                  checked={!!params.row.isInvoiceEnabled}
-                  onChange={async (e) => {
-                    // Update the value in backend and refresh table
-                    try {
-                      await updateUser(
-                        params.row.id,
-                        { isInvoiceEnabled: e.target.checked },
-                        "user",
-                        session?.user?.id!,
-                        dispatch
-                      );
-                      toast.success("Invoice Permission updated!");
-                      fetchUsers();
-                    } catch (error) {
-                      toast.error(
-                        "Failed to update Invoice Permission." +
-                          (error as any).response?.data?.message || ""
-                      );
-                    }
-                  }}
-                  color="primary"
-                  size="small"
-                />
-              ),
-            },
-            {
-              field: "isCombo",
-              headerName: "Combined Pdf Permission",
-              flex: 1,
-              renderCell: (params: GridRenderCellParams) => (
-                <Switch
-                  checked={!!params.row.isCombo}
-                  onChange={async (e) => {
-                    // Update the value in backend and refresh table
-                    try {
-                      await updateUser(
-                        params.row.id,
-                        { isCombo: e.target.checked },
-                        "user",
-                        session?.user?.id!,
-                        dispatch
-                      );
-                      toast.success("Combo Permission updated!");
-                      fetchUsers();
-                    } catch (error) {
-                      toast.error(
-                        "Failed to update Combo Permission." +
-                          (error as any).response?.data?.message || ""
-                      );
-                    }
-                  }}
-                  color="primary"
-                  size="small"
-                />
-              ),
-            },
-          ]
+          {
+            field: "isInvoiceEnabled",
+            headerName: "Invoice Permission",
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) => (
+              <Switch
+                checked={!!params.row.isInvoiceEnabled}
+                onChange={async (e) => {
+                  // Update the value in backend and refresh table
+                  try {
+                    await updateUser(
+                      params.row.id,
+                      { isInvoiceEnabled: e.target.checked },
+                      "user",
+                      session?.user?.id!,
+                      dispatch
+                    );
+                    toast.success("Invoice Permission updated!");
+                    fetchUsers();
+                  } catch (error) {
+                    toast.error(
+                      "Failed to update Invoice Permission." +
+                      (error as any).response?.data?.message || ""
+                    );
+                  }
+                }}
+                color="primary"
+                size="small"
+              />
+            ),
+          },
+          {
+            field: "isCombo",
+            headerName: "Combined Pdf Permission",
+            flex: 1,
+            renderCell: (params: GridRenderCellParams) => (
+              <Switch
+                checked={!!params.row.isCombo}
+                onChange={async (e) => {
+                  // Update the value in backend and refresh table
+                  try {
+                    await updateUser(
+                      params.row.id,
+                      { isCombo: e.target.checked },
+                      "user",
+                      session?.user?.id!,
+                      dispatch
+                    );
+                    toast.success("Combo Permission updated!");
+                    fetchUsers();
+                  } catch (error) {
+                    toast.error(
+                      "Failed to update Combo Permission." +
+                      (error as any).response?.data?.message || ""
+                    );
+                  }
+                }}
+                color="primary"
+                size="small"
+              />
+            ),
+          },
+        ]
         : []),
     ],
-    [session?.user?.userType, dispatch, fetchUsers, userTypeRadio]
+    [session?.user?.userType, dispatch, fetchUsers, userTypeRadio, session?.user?.id]
   );
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, row: any) => {
@@ -588,7 +595,7 @@ const Page = memo(function Page() {
       ),
       location:
         session?.user?.userType === "super_admin" ||
-        session?.user?.userType === "custom"
+          session?.user?.userType === "custom"
           ? userTypeRadioModal === "dealer"
             ? validateField("locationRef", formData.locationRef ?? "")
             : ""
@@ -597,16 +604,16 @@ const Page = memo(function Page() {
       password: !isEdit ? validateField("password", formData.password) : "",
       confirmPassword: !isEdit
         ? validateField(
-            "confirmPassword",
-            formData.confirmPassword,
-            formData.password
-          )
+          "confirmPassword",
+          formData.confirmPassword,
+          formData.password
+        )
         : "",
       userType: "",
       mainDealerRef:
         (session?.user?.userType === "super_admin" ||
           session?.user?.userType === "custom") &&
-        userTypeRadioModal === "dealer"
+          userTypeRadioModal === "dealer"
           ? validateField("mainDealerRef", formData.mainDealerRef ?? "")
           : "",
       adhaar: "",
@@ -714,7 +721,7 @@ const Page = memo(function Page() {
     } catch (error) {
       toast.error(
         "Operation failed. Please try again." +
-          (error as any).response.data.message || ""
+        (error as any).response.data.message || ""
       );
     }
   };
@@ -963,89 +970,74 @@ const Page = memo(function Page() {
           </Typography>
           {(session?.user?.userType === "super_admin" ||
             session?.user?.userType === "custom") && (
-            <>
-              <FormControl sx={{ mb: 2 }}>
-                <RadioGroup
-                  row
-                  value={userTypeRadioModal}
-                  onChange={(e) => {
-                    setUserTypeRadioModal(e.target.value as "nyom" | "dealer");
-                    setFormData((prev) => ({
-                      ...prev,
-                      userType: e.target.value === "dealer" ? "dealer" : "user",
-                      // Optionally reset mainDealerRef/locationRef if switching to nyom
-                      // ...(e.target.value === "nyom"
-                      //   ? { mainDealerRef: "", locationRef: "" }
-                      //   : {}),
-                    }));
-                  }}
-                  name="user-type-radio-modal"
-                >
-                  <FormControlLabel
-                    value="nyom"
-                    control={<Radio size="small" />}
-                    label="Nyom User"
-                    className="radio-label-small"
-                  />
-                  <FormControlLabel
-                    value="dealer"
-                    control={<Radio size="small" />}
-                    label="Dealer User"
-                    className="radio-label-small"
-                  />
-                </RadioGroup>
-              </FormControl>
-
-              {userTypeRadioModal === "dealer" && (
-                <>
-                  <TextField
-                    select
-                    fullWidth
-                    variant="standard"
-                    label="Main Dealer"
-                    value={formData.mainDealerRef}
-                    onChange={async (e) => {
-                      handleInputChange("mainDealerRef", e.target.value);
-                      await getLocationsByMasterDealer(dispatch, {
-                        userRef: e.target.value,
-                      });
+              <>
+                <FormControl sx={{ mb: 2 }}>
+                  <RadioGroup
+                    row
+                    value={userTypeRadioModal}
+                    onChange={(e) => {
+                      setUserTypeRadioModal(e.target.value as "nyom" | "dealer");
+                      setFormData((prev) => ({
+                        ...prev,
+                        userType: e.target.value === "dealer" ? "dealer" : "user",
+                        // Optionally reset mainDealerRef/locationRef if switching to nyom
+                        // ...(e.target.value === "nyom"
+                        //   ? { mainDealerRef: "", locationRef: "" }
+                        //   : {}),
+                      }));
                     }}
-                    margin="normal"
-                    required
-                    error={!!formErrors.mainDealerRef}
-                    helperText={formErrors.mainDealerRef}
+                    name="user-type-radio-modal"
                   >
-                    {(userDealerData || []).map((dealer) => (
-                      <MenuItem key={dealer.id} value={dealer.id}>
-                        {dealer.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    select
-                    fullWidth
-                    variant="standard"
-                    label="Location"
-                    value={formData.locationRef}
-                    onChange={(e) =>
-                      handleInputChange("locationRef", e.target.value)
-                    }
-                    onBlur={(e) => handleBlur("locationRef", e.target.value)}
-                    margin="normal"
-                    required
-                    error={!!formErrors.location}
-                    helperText={formErrors.location}
-                  >
-                    {locationData.map((loc) => (
-                      <MenuItem key={loc.id} value={loc._id}>
-                        {loc.title}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </>
-              )}
-            </>
-          )}
+                    <FormControlLabel
+                      value="nyom"
+                      control={<Radio size="small" />}
+                      label="Nyom User"
+                      className="radio-label-small"
+                    />
+                    <FormControlLabel
+                      value="dealer"
+                      control={<Radio size="small" />}
+                      label="Dealer User"
+                      className="radio-label-small"
+                    />
+                  </RadioGroup>
+                </FormControl>
+
+                {userTypeRadioModal === "dealer" && (
+                  <>
+                    <TextField
+                      select
+                      fullWidth
+                      variant="standard"
+                      label="Main Dealer"
+                      value={formData.mainDealerRef}
+                      onChange={async (e) => {
+                        handleInputChange("mainDealerRef", e.target.value);
+                      }}
+                      margin="normal"
+                      required
+                      error={!!formErrors.mainDealerRef}
+                      helperText={formErrors.mainDealerRef}
+                    ></TextField>
+                    <TextField
+                      select
+                      fullWidth
+                      variant="standard"
+                      label="Location"
+                      value={formData.locationRef}
+                      onChange={(e) =>
+                        handleInputChange("locationRef", e.target.value)
+                      }
+                      onBlur={(e) => handleBlur("locationRef", e.target.value)}
+                      margin="normal"
+                      required
+                      error={!!formErrors.location}
+                      helperText={formErrors.location}
+                    ></TextField>
+                  </>
+                )}
+              </>
+            )}
           {session?.user?.userType !== "super_admin" &&
             session?.user?.userType !== "custom" && (
               <TextField
@@ -1123,7 +1115,7 @@ const Page = memo(function Page() {
                   inputMode: "numeric",
                   pattern: "[0-9]*",
                 }}
-                // required // <-- REMOVE THIS LINE
+              // required // <-- REMOVE THIS LINE
               />
             )}
 
@@ -1365,21 +1357,21 @@ const Page = memo(function Page() {
         >
           {(session?.user?.userType === "super_admin" ||
             session?.user?.userType === "custom") && (
-            <FormControl
-              fullWidth
-              size="small"
-              variant="standard"
-              sx={{ mb: 2 }}
-            >
-              <InputLabel>Master Dealer</InputLabel>
-              <Select
-                name="mainDealerRef"
-                value={filterForm.mainDealerRef}
-                onChange={handleFilterSelectChange}
-                label="Master Dealer"
-              ></Select>
-            </FormControl>
-          )}
+              <FormControl
+                fullWidth
+                size="small"
+                variant="standard"
+                sx={{ mb: 2 }}
+              >
+                <InputLabel>Master Dealer</InputLabel>
+                <Select
+                  name="mainDealerRef"
+                  value={filterForm.mainDealerRef}
+                  onChange={handleFilterSelectChange}
+                  label="Master Dealer"
+                ></Select>
+              </FormControl>
+            )}
           <FormControl variant="standard">
             <Select
               value={filterDropDown}

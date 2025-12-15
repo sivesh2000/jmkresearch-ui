@@ -44,7 +44,7 @@ export const addState = (dispatch: Dispatch) => async (formData: { name: string;
         const response = await axiosInstance.post('states', formData);
         dispatch(setError(null));
         // Refresh the states list after adding
-        await getAllActiveStates(dispatch)();
+        await getAllActiveStates(dispatch,{})();
     } catch (error) {
         console.error('Error adding state:', error);
         dispatch(setError('Failed to add state'));
@@ -61,7 +61,7 @@ export const editState = (dispatch: Dispatch) => async (id: number, formData: { 
         const response = await axiosInstance.put(`states/${id}`, formData);
         dispatch(setError(null));
         // Refresh the states list after edit
-        await getAllActiveStates(dispatch)();
+        await getAllActiveStates(dispatch,{})();
     } catch (error) {
         console.error('Error editing state:', error);
         dispatch(setError('Failed to edit state'));
@@ -77,7 +77,7 @@ export const deleteState = (dispatch: Dispatch) => async (id: number) => {
         const response = await axiosInstance.delete(`states/${id}`);
         dispatch(setError(null));
         // Refresh the states list after deletion
-        await getAllActiveStates(dispatch)();
+        await getAllActiveStates(dispatch,{})();
     } catch (error) {
         console.error('Error deleting state:', error);
         dispatch(setError('Failed to delete state'));

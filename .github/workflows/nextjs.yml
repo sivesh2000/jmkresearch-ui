@@ -1,0 +1,27 @@
+name: Frontend Code Sync
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  sync:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout frontend code
+        uses: actions/checkout@v4
+
+      - name: Setup environment variables
+        run: |
+          touch .env
+          echo "${{ secrets.DEV }}" > .env
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Build application
+        run: npm run build
+
+      - name: Restart PM2 application
+        run: pm2 restart jmkresearch-frontend-app

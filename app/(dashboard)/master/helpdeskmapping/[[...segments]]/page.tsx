@@ -101,9 +101,10 @@ const Page = () => {
     fetchtableData();
   }, [dispatch, paginationModel]);
 
-  const { masterData } = useSelector(
-    (state: RootState) => state.certificateMasterData
-  );
+  // const { masterData } = useSelector(
+  //   (state: RootState) => []
+  // );
+  const [masterData, setMasterData] = useState<any>(null);
   const { helpdeskMappingData, loading, error } = useSelector(
     (state: RootState) => state.helpDeskMapping
   );
@@ -238,11 +239,11 @@ const Page = () => {
   // Mobile validation
   const validateMobile = (mobile: string) => {
     // if (!mobile) return "Mobile number is required";
-    if(mobile){
-    const mobileRegex = /^\d{10}$/;
-    return mobileRegex.test(mobile)
-      ? ""
-      : "Mobile number must be exactly 10 digits";
+    if (mobile) {
+      const mobileRegex = /^\d{10}$/;
+      return mobileRegex.test(mobile)
+        ? ""
+        : "Mobile number must be exactly 10 digits";
     }
     return "";
   };
@@ -375,12 +376,13 @@ const Page = () => {
           const parentCategoryObject = getCategoryData().find(
             (cat: any) => cat.id === selectedCategory
           );
-           // Remove description from selectedSubcategoryObjects
-        const subcategoriesWithoutDescription = selectedSubcategoryObjects.map(subcat => ({
-          id: subcat.id,
-          name: subcat.name
-          // Exclude description field
-        }));
+          // Remove description from selectedSubcategoryObjects
+          const subcategoriesWithoutDescription =
+            selectedSubcategoryObjects.map((subcat) => ({
+              id: subcat.id,
+              name: subcat.name,
+              // Exclude description field
+            }));
 
           finalData = {
             ...baseFormData,
@@ -489,17 +491,16 @@ const Page = () => {
       field: "categoryName",
       headerName: "Category",
       flex: 0.5,
-      
-      
     },
     {
       field: "roleRef",
       headerName: "Role Name",
       flex: 0.5,
-      
-      renderCell: (params) => (params.row.roleRef ? params.row.roleRef.title : ""),
+
+      renderCell: (params) =>
+        params.row.roleRef ? params.row.roleRef.title : "",
     },
-    
+
     {
       field: "mapping",
       headerName: "Mapped Email/Phone",
@@ -624,7 +625,9 @@ const Page = () => {
           <Card>
             <CardContent>
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" gutterBottom>Add/Update Mapping</Typography>
+                <Typography variant="h6" gutterBottom>
+                  Add/Update Mapping
+                </Typography>
                 {/* <FormControl component="fieldset">
                   <RadioGroup
                     row
@@ -882,20 +885,20 @@ const Page = () => {
       {/* Mapping Button - Only show when accordion is collapsed */}
       {!isAccordionExpanded && (
         <PermissionCheck action={HELP_DESK_MAPPING_ADD}>
-        <Card sx={{ mb: 2 }}>
-          <CardContent
-            sx={{ display: "flex", justifyContent: "flex-end", py: 2 }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleMappingButtonClick}
-              startIcon={<HubOutlinedIcon fontSize="small" />}
-              className="button-common button-primary"
+          <Card sx={{ mb: 2 }}>
+            <CardContent
+              sx={{ display: "flex", justifyContent: "flex-end", py: 2 }}
             >
-              Mapping
-            </Button>
-          </CardContent>
-        </Card>
+              <Button
+                variant="contained"
+                onClick={handleMappingButtonClick}
+                startIcon={<HubOutlinedIcon fontSize="small" />}
+                className="button-common button-primary"
+              >
+                Mapping
+              </Button>
+            </CardContent>
+          </Card>
         </PermissionCheck>
       )}
 
@@ -916,9 +919,7 @@ const Page = () => {
               pageSizeOptions={[5, 10]}
               rowCount={helpdeskMappingData?.totalResults || 0}
               paginationMode="server"
-              sx={{
-               
-              }}
+              sx={{}}
             />
           </Box>
         </CardContent>

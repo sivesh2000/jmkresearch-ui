@@ -62,7 +62,9 @@ axiosInstance.interceptors.response.use(
       cachedSession = null;
       sessionExpiry = 0;
       await signOut({
-        callbackUrl: `/auth/signin?redirect=${encodeURIComponent(window.location.pathname)}`,
+        callbackUrl: `/auth/signin?redirect=${encodeURIComponent(
+          window.location.pathname
+        )}`,
       });
       toast.error("Session expired please login again");
     }

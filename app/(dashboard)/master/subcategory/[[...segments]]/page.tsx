@@ -22,12 +22,17 @@ import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
-import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { buildPayload, getSubCategoryPayload, getFilterPayload } from "../helper";
 import { options, set } from "jodit/esm/core/helpers";
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
 import ColumnSelector from "@/app/components/ColumnSelector";
+
+interface ColSelectorProps {
+  options: GridColDef[];
+  selCol: GridColDef[];
+  setSelCol: (cols: GridColDef[]) => void;
+}
 
 const Page = memo(function Page() {
   const dispatch = useDispatch();
@@ -50,7 +55,7 @@ const Page = memo(function Page() {
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
   const [filterColumns, setFilterColumns] = useState<any[]>();
-  const [editableColumns, setEditableColumns] = useState([]);
+  const [editableColumns, setEditableColumns] = useState<any[]>([]);
   const [editRow, setEditRow] = useState<any>();
 
   const optionalColumns: GridColDef[] = [
@@ -63,10 +68,11 @@ const Page = memo(function Page() {
   useEffect(() => {
     console.log(activeCategories, "activeCategoriesactiveCategoriesactiveCategories")
     if (activeSubCategories) {
-      setFilterColumns(getFilterPayload(activeCategories || []));
-      setEditableColumns(getSubCategoryPayload(activeCategories || []));
+      const categoryIds = (activeCategories || []).map((cat: any) => cat._id || cat.id);
+      setFilterColumns(getFilterPayload(categoryIds));
+      setEditableColumns(getSubCategoryPayload(categoryIds));
     }
-  }, [activeSubCategories]);
+  }, [activeSubCategories,activeCategories]);
 
   const fetchSubCategories = useCallback(async () => {
     try {
@@ -82,7 +88,7 @@ const Page = memo(function Page() {
 
   useEffect(() => {
     fetchSubCategories();
-  }, []);
+  }, [fetchSubCategories]);
 
   const [columns, setColumns] = useState<GridColDef[]>([]);
 
@@ -148,7 +154,7 @@ const Page = memo(function Page() {
     } catch (err) {
       toast.error(
         "Failed to delete sub category." + (err as any).response.data.message ||
-          ""
+        ""
       );
     }
     setDeleteDialogOpen(false);
@@ -162,7 +168,7 @@ const Page = memo(function Page() {
 
   const handleModalClose = () => {
     setModalOpen(false);
-    setFormData({ parentId: "", sub_category_name: "", slug: "", description:"", status: true, id: null, });
+    setFormData({ parentId: "", sub_category_name: "", slug: "", description: "", status: true, id: null, });
   };
 
   const handleSave = async (data: any) => {
@@ -183,14 +189,14 @@ const Page = memo(function Page() {
         const resp = await addFunction(payload);
         console.log("Response", resp);
         setDrawer(false);
-        setFormData({ parentId: "", sub_category_name: "", slug: "", description:"", status: true, id: null, });
+        setFormData({ parentId: "", sub_category_name: "", slug: "", description: "", status: true, id: null, });
         toast.success("Sub Category created successfully!");
       }
       handleModalClose();
     } catch (err) {
       toast.error(
         "Operation failed. Please try again." +
-          (err as any).response.data.message || ""
+        (err as any).response.data.message || ""
       );
     }
   };
@@ -208,17 +214,9 @@ const Page = memo(function Page() {
   const MenuComponent = () => {
     return (
       <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
-        {/* <MenuItem onClick={() => handleAction('View')}>View</MenuItem> */}
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
-        </PermissionCheck>
-        {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
+        <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
+        <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
+        <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
       </Menu>
     );
   };
@@ -297,7 +295,7 @@ const Page = memo(function Page() {
                     <ListItemButton onClick={() => handleToggle(e)} dense>
                       <ListItemIcon>
                         <Checkbox edge="start" checked={checked.includes(e)} tabIndex={-1} disableRipple inputProps={{ "aria-labelledby": labelId }} />
-                        </ListItemIcon>
+                      </ListItemIcon>
                       <ListItemText id={labelId} primary={e.headerName} />
                     </ListItemButton>
                   </ListItem>
@@ -326,7 +324,7 @@ const Page = memo(function Page() {
           <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1, }}>
             <TextField sx={{ width: "300px" }} variant="standard" placeholder="Sub Category Name" margin="normal" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             <Box sx={{ textAlign: "right", pt: 2 }}>
-              <IconButton variant="contained" size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }); }}>
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }); }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
               <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: "" }); setSearchValue(""); }}>
@@ -336,17 +334,11 @@ const Page = memo(function Page() {
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
             <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
-            <PermissionCheck action={OEM_ADD}>
-              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
-                <AddIcon fontSize="small" />
-              </IconButton>
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ExportData dataArray={activeSubCategories} type={"button"} columns={columns} />
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ImportData title="Import Data" />
-            </PermissionCheck>
+            <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
+              <AddIcon fontSize="small" />
+            </IconButton>
+            <ExportData dataArray={activeSubCategories} type={"button"} columns={columns} />
+            <ImportData title="Import Data" />
             <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => onActionClicked("filter")}>
               <Filter1OutlinedIcon fontSize="small" />
             </IconButton>

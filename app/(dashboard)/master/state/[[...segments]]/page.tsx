@@ -53,12 +53,17 @@ import { RootState } from "@/app/redux/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PermissionCheck } from "@/app/components/PermissionCheck";
-import { OEM_ADD, OEM_EDIT } from "@/app/utils/permissionsActions";
 import { buildPayload, getStatePayload, getFilterPayload } from "../helper";
 import { options, set } from "jodit/esm/core/helpers";
 import ExportData from "@/app/components/ExportData";
 import ImportData from "@/app/components/ImportData";
 import ColumnSelector from "@/app/components/ColumnSelector";
+
+interface ColSelectorProps {
+  options: GridColDef[];
+  selCol: GridColDef[];
+  setSelCol: (cols: GridColDef[]) => void;
+}
 
 const Page = memo(function Page() {
   const dispatch = useDispatch();
@@ -84,7 +89,7 @@ const Page = memo(function Page() {
 
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
   const [filterColumns, setFilterColumns] = useState<any[]>();
-  const [editableColumns, setEditableColumns] = useState([]);
+  const [editableColumns, setEditableColumns] = useState<any[]>([]);
   const [editRow, setEditRow] = useState<any>();
 
   const optionalColumns: GridColDef[] = [
@@ -97,23 +102,21 @@ const Page = memo(function Page() {
       setFilterColumns(getFilterPayload(players || []));
       setEditableColumns(getStatePayload(players || []));
     }
-  }, [activeStates]);
+  }, [activeStates, players]);
 
   const fetchStates = useCallback(async () => {
     try {
-      getAllActiveStates(dispatch)();
+      getAllActiveStates(dispatch, {})();
       // getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
-      toast.error(
-        "Failed to fetch state/filters." + (error as any).response || ""
-      );
+      toast.error("Failed to fetch state/filters." + (error as any).response || "");
     }
   }, [dispatch]);
 
   useEffect(() => {
     fetchStates();
-  }, []);
+  }, [fetchStates]);
 
   const [columns, setColumns] = useState<GridColDef[]>([]);
 
@@ -127,7 +130,10 @@ const Page = memo(function Page() {
           field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) => params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
         },
         {
-          field: "actions", headerName: "Actions", width: 100, renderCell: (params) => (
+          field: "actions",
+          headerName: "Actions",
+          width: 100,
+          renderCell: (params) => (
             <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
               <MoreVertIcon color="action" />
             </IconButton>
@@ -203,22 +209,12 @@ const Page = memo(function Page() {
     try {
       if (isEdit) {
         const editFunction = editState(dispatch);
-        // await editFunction(formData.id!, {
-        //   name: formData.state_name,
-        //   code: formData.code,
-        //   isActive: formData.status,
-        // });
         const payload = buildPayload(data);
         await editFunction(data._id!, payload);
         setDrawer(false);
         toast.success("State updated successfully!");
       } else {
         const addFunction = addState(dispatch);
-        // const payload = {
-        //   name: data?.name,
-        //   code: data?.code,
-        //   isActive: true,
-        // };
         const payload = buildPayload(data);
         const resp = await addFunction(payload);
         console.log("Response", resp);
@@ -227,10 +223,7 @@ const Page = memo(function Page() {
       }
       handleModalClose();
     } catch (err) {
-      toast.error(
-        "Operation failed. Please try again." +
-          (err as any).response.data.message || ""
-      );
+      toast.error("Operation failed. Please try again." + (err as any).response.data.message || "");
     }
   };
 
@@ -247,17 +240,9 @@ const Page = memo(function Page() {
   const MenuComponent = () => {
     return (
       <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
-        {/* <MenuItem onClick={() => handleAction('View')}>View</MenuItem> */}
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
-        </PermissionCheck>
-        <PermissionCheck action={OEM_EDIT}>
-          <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
-        </PermissionCheck>
-        {/* <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem> */}
+        <MenuItem onClick={() => handleAction("View")}> View</MenuItem>
+        <MenuItem onClick={() => handleAction("Edit")}>Edit</MenuItem>
+        <MenuItem onClick={() => handleAction("Delete")}>Delete</MenuItem>
       </Menu>
     );
   };
@@ -359,7 +344,7 @@ const Page = memo(function Page() {
           <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1, }}>
             <TextField sx={{ width: "300px" }} variant="standard" placeholder="State Name" margin="normal" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             <Box sx={{ textAlign: "right", pt: 2 }}>
-              <IconButton variant="contained" size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }) }}>
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }) }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
               <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: '' }); setSearchValue(''); }}>
@@ -369,23 +354,24 @@ const Page = memo(function Page() {
           </Box>
           <Box sx={{ textAlign: "right", pt: 3 }}>
             <ColumnSelector options={optionalColumns} selCol={selCol} setSelCol={setSelCol} />
-            <PermissionCheck action={OEM_ADD}>
-              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
-                <AddIcon fontSize="small" />
-              </IconButton>
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ExportData dataArray={activeStates} type={"button"} columns={columns} />
-            </PermissionCheck>
-            <PermissionCheck action={OEM_ADD}>
-              <ImportData title="Import Data" />
-            </PermissionCheck>
+            <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => onActionClicked("add")}>
+              <AddIcon fontSize="small" />
+            </IconButton>
+            <ExportData dataArray={activeStates} type={"button"} columns={columns} />
+            <ImportData title="Import Data" />
             <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" } }} onClick={() => onActionClicked("filter")}>
               <Filter1OutlinedIcon fontSize="small" />
             </IconButton>
           </Box>
         </Box>
-        <LazyDataGrid rows={activeStates} getRowId={(row: any) => row._id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
+        <LazyDataGrid
+          rows={activeStates}
+          getRowId={(row: any) => row._id}
+          columns={columns}
+          loading={isLoading}
+          paginationModel={paginationModel}
+          pageSizeOptions={[5, 10]}
+        />
       </Paper>
       <MenuComponent />
       <DeleteDialog />

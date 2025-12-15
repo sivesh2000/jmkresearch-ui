@@ -16,7 +16,12 @@ const nextConfig = {
       },
     },
   },
-  allowedDevOrigins: ["13.202.130.75", "nyomx.com", "13.126.11.182"],
+  allowedDevOrigins: [
+    "jmkresearch.com",
+    "www.jmkresearch.com",
+    "52.66.166.61",
+    "172.31.15.172",
+  ],
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },

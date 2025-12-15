@@ -1,10 +1,10 @@
 {
   "apps": [
     {
-      "name": "jmk-frontend-app",
+      "name": "jmkresearch-frontend-app",
       "script": "npm",
       "args": "run start:prod",
-      "cwd": "/home/ubuntu/actions-runner-frontend/_work/frontend-app/frontend-app",
+      "cwd": "/home/ubuntu/actions-runner-frontend/_work/jmkresearch-ui/jmkresearch-ui",
       "instances": 1,
       "autorestart": true,
       "watch": false,

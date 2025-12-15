@@ -34,16 +34,16 @@ const NON_EDITABLE_FIELDS = ["email", "oemRef", "status"];
 export default function Page() {
   const dispatch = useDispatch();
   const { data: session } = useSession();
-  const userData = session?.user || {};
 
   useEffect(() => {
+    const userData = session?.user || {};
     if (userData && Object.keys(userData).length > 0) {
       dispatch(setLoggedInUser(userData));
     }
-  }, [userData, dispatch]);
+  }, [session, dispatch]);
 
   const { loggedInUser } = useSelector((state: any) => state.loggedUserData);
-  let safeLoggedInUser = loggedInUser || {};
+  const safeLoggedInUser = useMemo(() => loggedInUser || {}, [loggedInUser]);
 
   // Use useMemo so initialFormState updates when loggedInUser changes
   const initialFormState = useMemo(
@@ -98,7 +98,6 @@ export default function Page() {
       try {
         const updatedUser = await updateProfile(dispatch, filteredData);
         dispatch(setLoggedInUser(updatedUser));
-        safeLoggedInUser = updatedUser; // Update local reference
         toast.success("Profile updated successfully");
       } catch (error) {
         toast.error("Failed to update profile. Please try again." + (error as any).response.data.message || "");

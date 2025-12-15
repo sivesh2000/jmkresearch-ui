@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
@@ -78,7 +78,7 @@ export default function Page() {
       try {
         await getAllRolesData(dispatch)();
         await getAllDomainsData(dispatch)();
-        return(
+        return (
           dispatch(resetAssignedPermissionsData())
         )
       } catch (error) {
@@ -88,37 +88,9 @@ export default function Page() {
       }
     };
     fetchAllData();
-  }, []);
-  // Add this useEffect after your existing useEffects
-  useEffect(() => {
-    // Re-filter permissions when permissionsData changes and a module is selected
-    if (selectedModule && permissionsData) {
-      handleFilterModulePermissions(selectedModule);
-    }
-  }, [permissionsData, selectedModule]);
-  // Handle role selection
-  const handleRoleChange = async (event: any) => {
-    try {
-      await getAllPermissionsData(dispatch)(event.target.value);
-      await getAllAssignedPermissionsData(dispatch)(event.target.value);
-    } catch (error) {
-      toast.error(
-        "Failed to load data: " + (error as any).response?.data?.message || ""
-      );
-    }
-    setSelectedRole(event.target.value);
-    setSelectedRowIds([]); // Clear selected rows when role changes
-  };
+  }, [dispatch]);
 
-  // Handle module selection
-  const handleModuleChange = (event: any) => {
-    const selectedModuleId = event.target.value;
-    setSelectedModule(selectedModuleId);
-    // console.log("Selected module:", selectedModuleId);
-    handleFilterModulePermissions(selectedModuleId);
-    setSelectedAvailableRowIds([]); // Clear selected rows when module changes
-  };
-  const handleFilterModulePermissions = (moduleId: string) => {
+  const handleFilterModulePermissions = useCallback((moduleId: string) => {
     try {
       console.log("function called with moduleId:", moduleId);
       // Filter permissions based on selected module
@@ -146,7 +118,37 @@ export default function Page() {
       toast.error("Failed to load permissions for selected module");
       setFinalPermissions([]);
     }
+  }, [permissionsData]);
+  // Add this useEffect after your existing useEffects
+  useEffect(() => {
+    // Re-filter permissions when permissionsData changes and a module is selected
+    if (selectedModule && permissionsData) {
+      handleFilterModulePermissions(selectedModule);
+    }
+  }, [permissionsData, selectedModule, handleFilterModulePermissions]);
+  // Handle role selection
+  const handleRoleChange = async (event: any) => {
+    try {
+      await getAllPermissionsData(dispatch)(event.target.value);
+      await getAllAssignedPermissionsData(dispatch)(event.target.value);
+    } catch (error) {
+      toast.error(
+        "Failed to load data: " + (error as any).response?.data?.message || ""
+      );
+    }
+    setSelectedRole(event.target.value);
+    setSelectedRowIds([]); // Clear selected rows when role changes
   };
+
+  // Handle module selection
+  const handleModuleChange = (event: any) => {
+    const selectedModuleId = event.target.value;
+    setSelectedModule(selectedModuleId);
+    // console.log("Selected module:", selectedModuleId);
+    handleFilterModulePermissions(selectedModuleId);
+    setSelectedAvailableRowIds([]); // Clear selected rows when module changes
+  };
+
 
   // Handle individual checkbox selection for assigned permissions
   const handleCheckboxChange = (id: string) => {
@@ -414,84 +416,84 @@ export default function Page() {
             </CardContent>
           </Card>
         </Grid>
-          {/*right table */}
-          <Grid size={{ lg: 6, md: 12, sm: 12, xs: 12 }}>
-            <Card sx={{ height: "90vh" }}>
-              <CardContent sx={{ height: "90vh", overflowY: "auto" }}>
-                {/* Search Available Permissions Heading */}
-                <Typography gutterBottom variant="h6">
-                  Permissions
-                </Typography>
+        {/*right table */}
+        <Grid size={{ lg: 6, md: 12, sm: 12, xs: 12 }}>
+          <Card sx={{ height: "90vh" }}>
+            <CardContent sx={{ height: "90vh", overflowY: "auto" }}>
+              {/* Search Available Permissions Heading */}
+              <Typography gutterBottom variant="h6">
+                Permissions
+              </Typography>
 
-                <FormControl fullWidth variant="standard" sx={selectedRole === "" ? { mb: 0 } : { mb: 3 }} error={selectedRole === ""}>
-                  <InputLabel>Modules</InputLabel>
-                  <Select
-                    value={selectedModule}
-                    onChange={handleModuleChange}
-                    label="Modules"
-                    disabled={selectedRole === ""}
-                  >
-                    {domainsData?.map((option) => (
-                      <MenuItem key={option.id} value={option.id}>
-                        {option.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {selectedRole === "" && (
-                    <FormHelperText >Please select a role first to manage permissions.</FormHelperText>
-                  )}
-                </FormControl>
-                {/* Available Permissions Heading */}
-                <Typography gutterBottom fontWeight="bold">
-                  Available Permissions
-                </Typography>
-
-                {/* DataGrid with Custom Checkbox Column */}
-                <Paper sx={{ height: "auto", width: "100%", mb: 2 }}>
-                  <DataGrid
-                    rows={finalPermissions} // Use finalPermissions instead of availablePermissions
-                    getRowId={(row) => row.id}
-                    columns={availablePermissionsColumns}
-                    hideFooterSelectedRowCount={true}
-                    initialState={{
-                      pagination: {
-                        paginationModel: { page: 0, pageSize: 5 },
-                      },
-                    }}
-                    pageSizeOptions={[5, 10]}
-                    getRowHeight={() => "auto"}
-                    sx={{
-                      "& .MuiDataGrid-cell": {
-                        whiteSpace: "normal !important",
-                        wordWrap: "break-word",
-                        lineHeight: "1.2 !important",
-                        padding: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                      },
-                      "& .MuiDataGrid-row": {
-                        "&:hover": {
-                          backgroundColor: "rgba(0, 0, 0, 0.04)",
-                        },
-                      },
-                    }}
-                  />
-                </Paper>
-
-                {/* Add Button */}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAddClick}
-                  disabled={selectedAvailableRowIds.length === 0}
-                  className="button-common"
-                  startIcon={<AddIcon />}
+              <FormControl fullWidth variant="standard" sx={selectedRole === "" ? { mb: 0 } : { mb: 3 }} error={selectedRole === ""}>
+                <InputLabel>Modules</InputLabel>
+                <Select
+                  value={selectedModule}
+                  onChange={handleModuleChange}
+                  label="Modules"
+                  disabled={selectedRole === ""}
                 >
-                  Add Selected ({selectedAvailableRowIds.length})
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
+                  {domainsData?.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {selectedRole === "" && (
+                  <FormHelperText >Please select a role first to manage permissions.</FormHelperText>
+                )}
+              </FormControl>
+              {/* Available Permissions Heading */}
+              <Typography gutterBottom fontWeight="bold">
+                Available Permissions
+              </Typography>
+
+              {/* DataGrid with Custom Checkbox Column */}
+              <Paper sx={{ height: "auto", width: "100%", mb: 2 }}>
+                <DataGrid
+                  rows={finalPermissions} // Use finalPermissions instead of availablePermissions
+                  getRowId={(row) => row.id}
+                  columns={availablePermissionsColumns}
+                  hideFooterSelectedRowCount={true}
+                  initialState={{
+                    pagination: {
+                      paginationModel: { page: 0, pageSize: 5 },
+                    },
+                  }}
+                  pageSizeOptions={[5, 10]}
+                  getRowHeight={() => "auto"}
+                  sx={{
+                    "& .MuiDataGrid-cell": {
+                      whiteSpace: "normal !important",
+                      wordWrap: "break-word",
+                      lineHeight: "1.2 !important",
+                      padding: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                    },
+                    "& .MuiDataGrid-row": {
+                      "&:hover": {
+                        backgroundColor: "rgba(0, 0, 0, 0.04)",
+                      },
+                    },
+                  }}
+                />
+              </Paper>
+
+              {/* Add Button */}
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAddClick}
+                disabled={selectedAvailableRowIds.length === 0}
+                className="button-common"
+                startIcon={<AddIcon />}
+              >
+                Add Selected ({selectedAvailableRowIds.length})
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
     </PageContainer>
   );
