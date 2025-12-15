@@ -1,15 +1,25 @@
 import { GridColDef, GridDownloadIcon } from "@mui/x-data-grid";
 export type ColumnConfig = {
-  field: string;
-  headerName: string;
-  flex: number;
-  type: string;
-  options?: any[];
-  optionLabelField?: string;
-  optionValueField?: string;
-  all?: boolean;
+    field: string;
+    headerName: string;
+    flex: number;
+    type: string;
+    options?: any[];
+    optionLabelField?: string;
+    optionValueField?: string;
+    all?: boolean;
 };
+interface CompanyItem {
+    id: number;
+    name: string;
+    isActive: boolean;
+}
 
+interface StateItem {
+    id: number;
+    name: string;
+    isActive: boolean;
+}
 const defaultPayload = {
     tenderName: "",
     tenderNumber: "",
@@ -52,8 +62,7 @@ export const buildPayload = (input: any) => {
     };
 };
 
-
-export const getTenderPayload = (companies: GridColDef[], states:any[]) => {
+export const getTenderPayload = (companies: CompanyItem[], states: StateItem[]) => {
     console.log("Companies", companies)
     console.log("states", states)
     return ([
@@ -78,9 +87,9 @@ export const getTenderPayload = (companies: GridColDef[], states:any[]) => {
         { field: 'ppaSigningDate', headerName: 'PPA Signing Date', flex: 1, type: 'textbox' },
         { field: 'location', headerName: 'Location', flex: 1, type: 'textbox' },
         { field: 'resultAnnouncedDate', headerName: 'Result Announced Date', flex: 1, type: 'textbox' },
-        { field: 'company', headerName: 'Company', flex: 1, type: 'dropdown', options: companies || [], optionLabelField: 'name', optionValueField: null , all:false },
-        { field: 'state', headerName: 'State', flex: 1, type: 'dropdown', options: states || [], optionLabelField: 'name', optionValueField: null , all:false },
-        
+        { field: 'company', headerName: 'Company', flex: 1, type: 'dropdown', options: companies || [], optionLabelField: 'name', optionValueField: null, all: false },
+        { field: 'state', headerName: 'State', flex: 1, type: 'dropdown', options: states || [], optionLabelField: 'name', optionValueField: null, all: false },
+
     ]);
 };
 
@@ -120,7 +129,7 @@ const filterColumns: any[] = [
 
 
 ];
-export const getFilterPayload = (companies: any[], states:any[]) => {
+export const getFilterPayload = (companies: any[], states: any[]) => {
     return ([
         { field: 'tenderName', headerName: 'Tender Name', flex: 1, type: 'textbox' },
         { field: 'tenderNumber', headerName: 'Tender Number', flex: 1, type: 'textbox' },

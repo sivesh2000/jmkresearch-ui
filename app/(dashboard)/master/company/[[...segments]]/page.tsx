@@ -74,6 +74,7 @@ const Page = memo(function Page() {
   const [deleteRow, setDeleteRow] = useState<any>(null);
   const [searchValue, setSearchValue] = useState<String>("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editRow, setEditRow] = useState<any>(null);
   const [formData, setFormData] = useState({
     make_name: "",
     status: true,
@@ -83,7 +84,7 @@ const Page = memo(function Page() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
   const [drawerAction, setDrawerAction] = useState<
-    "filter" | "add" | "edit" | "import" | "export"
+    "filter" | "add" | "edit" | "import" | "export" | "view"
   >("filter");
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
@@ -247,18 +248,19 @@ const Page = memo(function Page() {
   };
 
   const handleAction = (task: string) => {
+    setEditRow(selectedRow);
     if (task === "Edit") {
-      setFormData({
-        make_name: selectedRow.name,
-        status: selectedRow.isActive,
-        id: selectedRow._id,
-      });
       setIsEdit(true);
-      setModalOpen(true);
+      setDrawerAction("edit");
+      setDrawer(true);
     } else if (task === "Delete") {
-      setDeleteRow(selectedRow);
       setDeleteDialogOpen(true);
-    } else {
+    }  else if (task === "View") {
+      setDrawerAction("view");
+      setDrawer(true);
+    }
+
+    else {
       console.log(`${task} clicked for:`, selectedRow);
     }
     handleCloseMenu();
@@ -296,13 +298,11 @@ const Page = memo(function Page() {
   };
 
   const handleSave = async (data: any) => {
+    console.log("Date", data)
     try {
       if (isEdit) {
         const editFunction = editCompany(dispatch);
-        await editFunction(formData.id!, {
-          name: formData.make_name,
-          isActive: formData.status,
-        });
+        await editFunction(data.id!, data);
         toast.success("Make updated successfully!");
       } else {
         const addFunction = addCompany(dispatch);
@@ -593,6 +593,13 @@ const Page = memo(function Page() {
         buttonClearLabel="Clear"
       />
       <CommonDrawer
+        title={"View Company Details"}
+        defaultValue={editRow}
+        isOpen={isDrawer && drawerAction === "view"}
+        setOpen={setDrawer}
+        buttonCancelLabel="Cancel"
+      />
+      <CommonDrawer
         title={"Add New Company"}
         isOpen={isDrawer && drawerAction === "add"}
         setOpen={setDrawer}
@@ -605,8 +612,9 @@ const Page = memo(function Page() {
         title={"Edit Company"}
         isOpen={isDrawer && drawerAction === "edit"}
         setOpen={setDrawer}
-        columns={filterColumns}
+        columns={newCompany}
         onApply={handleSave}
+        defaultValue={editRow}
         buttonOkLabel="Update"
         buttonCancelLabel="Cancel"
       />
