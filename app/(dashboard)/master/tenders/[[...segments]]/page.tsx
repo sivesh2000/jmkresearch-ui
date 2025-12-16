@@ -220,15 +220,19 @@ const Page = memo(function Page() {
   };
 
   const handleAction = (task: string) => {
-    console.log(activeCompanies, "Task", activeStates)
-    // setEditRow(selectedRow);
     if (task === "Edit") {
-      const selectedCompany = activeCompanies.find((comp: any) => comp.name === selectedRow?.companyId?.name);
-      const selectedState = activeStates.find((sta: any) => sta.name === selectedRow?.stateId?.name);
-
-      // console.log(selectedCompany, "<<<>>>", selectedState)
-      // setEditRow({ ...selectedRow, companyId: selectedCompany || null });
-      setEditRow(selectedRow);
+      const selectedCompany = activeCompanies.find((comp: any) => 
+        comp.id === selectedRow?.companyId?.id || comp.name === selectedRow?.companyId?.name
+      );
+      const selectedState = activeStates.find((sta: any) => 
+        sta._id === selectedRow?.stateId?._id || sta.name === selectedRow?.stateId?.name
+      );
+      const editRowData = {
+        ...selectedRow,
+        company: selectedCompany || null,
+        state: selectedState || null
+      };
+      setEditRow(editRowData);
       setIsEdit(true);
       setDrawerAction('edit');
       setDrawer(true);
