@@ -144,9 +144,9 @@ const Page = memo(function Page() {
   }, [activeTenders]);
 
   const [columns, setColumns] = useState<GridColDef[]>([
-    { field: "name", headerName: "Tender Name", flex: 1 },
-    { field: "description", headerName: "Brief Overview", flex: 1 },
-    { field: "playerType", headerName: "Player Type", flex: 1 },
+    { field: "tenderName", headerName: "Tender Name", flex: 1 },
+    { field: "tenderNumber", headerName: "Tender Number", flex: 1 },
+    { field: "location", headerName: "Location", flex: 1 },
     {
       field: "isActive",
       headerName: "Status",
@@ -185,9 +185,9 @@ const Page = memo(function Page() {
   useEffect(() => {
     if (selCol) {
       setColumns([
-        { field: "name", headerName: "Tender Name", flex: 1 },
-        { field: "description", headerName: "Brief Overview", flex: 1 },
-        { field: "playerType", headerName: "Player Type", flex: 1 },
+        { field: "tenderName", headerName: "Tender Name", flex: 1 },
+        { field: "tenderNumber", headerName: "Tender Number", flex: 1 },
+        { field: "location", headerName: "Location", flex: 1 },
         {
           field: "isActive",
           headerName: "Status",
@@ -292,17 +292,25 @@ const Page = memo(function Page() {
   };
 
   const handleSave = async (data: any) => {
+    console.log(data, "HandleSave")
+    let transformedData = {
+      ...data,
+      companyId: data.company.id,
+      stateId: data.state._id,
+    };
+    delete transformedData.company;
+    delete transformedData.state;
     try {
       if (isEdit) {
         const editFunction = editTender(dispatch);
-        await editFunction(formData.id!, {
-          name: formData.make_name,
-          isActive: formData.status,
-        });
-        toast.success("Make updated successfully!");
+        const payload = buildPayload(transformedData);
+        await editFunction(data.id!, payload);
+        setDrawer(false);
+        toast.success("Tender updated successfully!");
       } else {
         const addFunction = addTender(dispatch);
-        const payload = buildPayload(data);
+        const payload = buildPayload(transformedData);
+        console.log("payload", payload);
         const resp = await addFunction(payload);
         console.log("resp", resp);
         setDrawer(false);
@@ -461,7 +469,7 @@ const Page = memo(function Page() {
   };
 
   const onActionClicked = (
-    action: "filter" | "add" | "edit" | "import" | "export"
+    action: "filter" | "add" | "edit" | "import" | "view" | "export"
   ) => {
     setDrawerAction(action);
     setDrawer(true);
@@ -645,7 +653,7 @@ const Page = memo(function Page() {
       <CommonDrawer title={'View Tender Info'} isOpen={isDrawer && drawerAction === 'view'} setOpen={setDrawer} defaultValue={editRow} buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
       <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
       <CommonDrawer title={'Add New Tender'} isOpen={isDrawer && drawerAction === 'add'} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Add" buttonCancelLabel="Cancel" />
-      <CommonDrawer title={'Edit Tender'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={editableColumns} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
+      <CommonDrawer title={'Edit Tender'} isOpen={isDrawer && drawerAction === 'edit'} setOpen={setDrawer} columns={editableColumns} defaultValue={editRow} onApply={handleSave} buttonOkLabel="Update" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Import Data'} isOpen={isDrawer && drawerAction === 'import'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Import" buttonCancelLabel="Cancel" />
       <CommonDrawer title={'Export Data'} isOpen={isDrawer && drawerAction === 'export'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Export" buttonCancelLabel="Cancel" />
     </PageContainer>
