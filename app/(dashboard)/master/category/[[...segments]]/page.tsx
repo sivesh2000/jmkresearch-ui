@@ -75,7 +75,7 @@ const Page = memo(function Page() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      getAllActiveCategories(dispatch, {})();
+      getAllActiveCategories(dispatch, {parentId:'null'})();
       // getAllFilterPlayers(dispatch)();
     } catch (error) {
       // Handle error silently
@@ -374,7 +374,7 @@ const Page = memo(function Page() {
               <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }) }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: '' }); setSearchValue(''); }}>
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({parentId:'null'}); setSearchValue(''); }}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </Box>

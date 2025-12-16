@@ -76,7 +76,8 @@ const Page = memo(function Page() {
 
   const fetchSubCategories = useCallback(async () => {
     try {
-      getAllActiveSubCategories(dispatch, {})();
+      getAllActiveSubCategories(dispatch, { parentId: 'notnull' })();
+      getAllActiveCategories(dispatch,{ parentId: 'null' })();
     } catch (error) {
       // Handle error silently
       toast.error(
@@ -127,7 +128,7 @@ const Page = memo(function Page() {
     console.log("Task", selectedRow)
     if (task === "Edit") {
       const parent = activeCategories.find((cat: any) => cat.name === selectedRow?.parentId?.name);
-      setEditRow({...selectedRow, parentId: parent || null });
+      setEditRow({ ...selectedRow, parentId: parent || null });
       setDrawerAction('edit');
       setDrawer(true);
       setIsEdit(true);
@@ -326,7 +327,7 @@ const Page = memo(function Page() {
               <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }); }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: "" }); setSearchValue(""); }}>
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ parentId: 'notnull' }); setSearchValue(""); }}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </Box>

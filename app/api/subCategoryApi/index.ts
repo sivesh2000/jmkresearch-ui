@@ -23,9 +23,7 @@ export const getAllActiveSubCategories = (dispatch: Dispatch, filters: any) => a
 
         // Step 2: Filter subcategories that have a parentId and add subCatName
         const filterSubCategories = categories.filter((subCategory: any) => subCategory.parentId != null);
-        console.log("Sub Categories",filterSubCategories)
         dispatch(setSubCategories(filterSubCategories));
-        dispatch(setCategories(categories));
         dispatch(setError(null));
     } catch (error) {
         console.error('Error fetching sub categories:', error);
