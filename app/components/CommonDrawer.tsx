@@ -8,7 +8,7 @@ import {
     Menu, MenuItem, TextField, Drawer,
     Chip, Radio, RadioGroup, FormControlLabel, FormLabel,
     Accordion, AccordionActions, AccordionSummary, AccordionDetails,
-    Stack,
+    Stack, Checkbox, ListItemText,
 } from "@mui/material";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -161,15 +161,28 @@ const CommonDrawer = memo(function CommonDrawer({
                         case 'dropdown':
                             return (<FormControl fullWidth variant="standard" key={prefix + column.field}>
                                 <InputLabel>{column.headerName}</InputLabel>
-                                <Select value={getDropdownValue(localData, column.field, column.optionValueField, parent)} onChange={(e) => onChangeHandler(column.field, e.target.value)}>
-                                    {(column.all === undefined || column.all === true) && (<SelectItem value="">All</SelectItem>)}
-                                    {column.options?.map((option: any, index: number) => (
-                                        <SelectItem key={`op-${index}`} value={
-                                            column.optionValueField
-                                                ? option[column.optionValueField]
-                                                : option
-                                        }>{column.optionLabelField ? option[column.optionLabelField] : option}</SelectItem>
-                                    ))}
+                                <Select 
+                                    multiple={column.multiple || false}
+                                    value={column.multiple ? (getDropdownValue(localData, column.field, column.optionValueField, parent) || []) : getDropdownValue(localData, column.field, column.optionValueField, parent)} 
+                                    onChange={(e) => onChangeHandler(column.field, e.target.value)}
+                                    renderValue={column.multiple ? (selected: any) => Array.isArray(selected) ? selected.join(', ') : selected : undefined}
+                                >
+                                    {(column.all === undefined || column.all === true) && !column.multiple && (<SelectItem value="">All</SelectItem>)}
+                                    {column.options?.map((option: any, index: number) => {
+                                        const optionValue = column.optionValueField ? option[column.optionValueField] : option;
+                                        const optionLabel = column.optionLabelField ? option[column.optionLabelField] : option;
+                                        return (
+                                            <SelectItem key={`op-${index}`} value={optionValue}>
+                                                {column.multiple && (
+                                                    <Checkbox 
+                                                        checked={Array.isArray(getDropdownValue(localData, column.field, column.optionValueField, parent)) ? 
+                                                            getDropdownValue(localData, column.field, column.optionValueField, parent).indexOf(optionValue) > -1 : false} 
+                                                    />
+                                                )}
+                                                <ListItemText primary={optionLabel} />
+                                            </SelectItem>
+                                        );
+                                    })}
                                 </Select>
                             </FormControl>);
                         case 'switch':

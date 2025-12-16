@@ -80,6 +80,7 @@ const Page = memo(function Page() {
     status: true,
     id: null,
   });
+  const [selectedPlayerTypes, setSelectedPlayerTypes] = useState<string[]>([]);
   const [isEdit, setIsEdit] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
@@ -288,6 +289,7 @@ const Page = memo(function Page() {
 
   const handleAddClick = () => {
     setFormData({ make_name: "", status: true, id: null });
+    setSelectedPlayerTypes([]);
     setIsEdit(false);
     setModalOpen(true);
   };
@@ -295,18 +297,21 @@ const Page = memo(function Page() {
   const handleModalClose = () => {
     setModalOpen(false);
     setFormData({ make_name: "", status: true, id: null });
+    setSelectedPlayerTypes([]);
   };
 
-  const handleSave = async (data: any) => {
-    console.log("Date", data)
+  const handleSave = async (data?: any) => {
+    const saveData = data || { ...formData, playerType: selectedPlayerTypes };
+    console.log("Date", saveData)
     try {
       if (isEdit) {
         const editFunction = editCompany(dispatch);
-        await editFunction(data.id!, data);
-        toast.success("Make updated successfully!");
+        await editFunction(saveData.id!, saveData);
+        setDrawer(false);
+        toast.success("Company updated successfully!");
       } else {
         const addFunction = addCompany(dispatch);
-        const payload = buildPayload(data);
+        const payload = buildPayload(saveData);
         const resp = await addFunction(payload);
         console.log("resp", payload);
         setDrawer(false);
@@ -382,14 +387,17 @@ const Page = memo(function Page() {
           <FormControl fullWidth variant="standard" margin="normal">
             <InputLabel>Player Type</InputLabel>
             <Select
-              // value={filterValue}
-              // onChange={(e) => setFilterValue(e.target.value)}
+              multiple
+              value={selectedPlayerTypes}
+              onChange={(e) => setSelectedPlayerTypes(e.target.value as string[])}
               label="Player Type"
+              renderValue={(selected) => selected.join(', ')}
             >
               {players &&
                 players.map((player: any, index: number) => (
                   <MenuItem key={index} value={player}>
-                    {player}
+                    <Checkbox checked={selectedPlayerTypes.indexOf(player) > -1} />
+                    <ListItemText primary={player} />
                   </MenuItem>
                 ))}
             </Select>

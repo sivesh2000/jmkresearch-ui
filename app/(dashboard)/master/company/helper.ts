@@ -24,10 +24,10 @@ const defaultPayload = {
     tags: [],
     isActive: true
 };
-export const buildPayload = (input: any) => {
+export const buildPayload = (input: any, action:String="edit") => {
     console.log("inputs", input)
     // const 
-    return {
+    let response = {
         ...defaultPayload,
         ...input,
         slug:
@@ -52,6 +52,10 @@ export const buildPayload = (input: any) => {
 
         }
     };
+    if(action === 'edit'){
+        delete response['socialLinks'];
+    }
+    return response;
 };
 
 export const getCompanyPayload = (players: String[]) => {

@@ -61,8 +61,8 @@ const Page = memo(function Page() {
   const [editRow, setEditRow] = useState<any>();
   const optionalColumns: GridColDef[] = [
     { field: "slug", headerName: "Slug", flex: 1 },
-    { field: "icon", headerName: "Icon", flex: 1 },
-    { field: "color", headerName: "Color", flex: 1 },
+    // { field: "icon", headerName: "Icon", flex: 1 },
+    // { field: "color", headerName: "Color", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
   ];
 
