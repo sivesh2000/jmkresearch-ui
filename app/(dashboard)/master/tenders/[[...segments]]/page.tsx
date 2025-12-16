@@ -293,11 +293,13 @@ const Page = memo(function Page() {
 
   const handleSave = async (data: any) => {
     console.log(data, "HandleSave")
-    const transformedData = {
+    let transformedData = {
       ...data,
       companyId: data.company.id,
       stateId: data.state._id,
     };
+    delete transformedData.company;
+    delete transformedData.state;
     try {
       if (isEdit) {
         const editFunction = editTender(dispatch);
@@ -467,7 +469,7 @@ const Page = memo(function Page() {
   };
 
   const onActionClicked = (
-    action: "filter" | "add" | "edit" | "import" | "export"
+    action: "filter" | "add" | "edit" | "import" | "view" | "export"
   ) => {
     setDrawerAction(action);
     setDrawer(true);

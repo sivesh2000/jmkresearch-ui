@@ -173,18 +173,16 @@ const Page = memo(function Page() {
   };
 
   const handleSave = async (data: any) => {
-    const transformedData = {
-      ...data,
-      parentId: data.parentId
-    };
     try {
       if (isEdit) {
+        const transformedData = {...data,parentId: data?.parentId?._id};
         const editFunction = editSubCategory(dispatch);
         const payload = buildPayload(transformedData);
         await editFunction(data._id!, payload);
         setDrawer(false);
         toast.success("Sub Category updated successfully!");
       } else {
+        const transformedData = {...data,parentId: data.parentId};
         const addFunction = addSubCategory(dispatch);
         const payload = buildPayload(transformedData);
         const resp = await addFunction(payload);
