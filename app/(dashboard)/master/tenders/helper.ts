@@ -23,7 +23,7 @@ interface StateItem {
 const defaultPayload = {
     tenderName: "",
     tenderNumber: "",
-    // slug: "",
+    slug: "",
     rfsIssueDate: "",
     bidSubmissionDeadline: "",
     technology: "",
@@ -51,8 +51,8 @@ const defaultPayload = {
     tenderDocuments: [],
 
     isActive: true,
-    // createdAt: new Date(),
-    // updatedAt: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
 };
 export const buildPayload = (input: any, action:String="edit") => {
     console.log("Input", input);
@@ -72,20 +72,20 @@ export const buildPayload = (input: any, action:String="edit") => {
         isActive: input.value || true
     };
     if(action === 'new'){
-        delete input['slug'];
-        delete input['company'];
-        delete input['state'];
-        delete input['createdAt'];
-        delete input['updatedAt'];
+        delete response['slug'];
+        delete response['company'];
+        delete response['state'];
+        delete response['createdAt'];
+        delete response['updatedAt'];
     }
     if(action === 'edit'){
         delete response['id'];
         delete response['tenderDocuments'];
-        delete input['slug'];
-        delete input['company'];
-        delete input['state'];
-        delete input['createdAt'];
-        delete input['updatedAt'];
+        delete response['slug'];
+        delete response['company'];
+        delete response['state'];
+        delete response['createdAt'];
+        delete response['updatedAt'];
     }
     return response;
 };
