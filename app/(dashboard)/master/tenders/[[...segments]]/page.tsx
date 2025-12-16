@@ -85,7 +85,7 @@ const Page = memo(function Page() {
   const optionalColumns: GridColDef[] = [
     { field: 'tenderName', headerName: 'Tender Name', flex: 1 },
     { field: 'tenderNumber', headerName: 'Tender Number', flex: 1 },
-    { field: 'slug', headerName: 'Slug', flex: 1 },
+    // { field: 'slug', headerName: 'Slug', flex: 1 },
     { field: 'rfsIssueDate', headerName: 'RFS Issue Date', flex: 1 },
     { field: 'bidSubmissionDeadline', headerName: 'BID Submission Deadline', flex: 1 },
     { field: 'technology', headerName: 'Technology', flex: 1 },
@@ -111,8 +111,8 @@ const Page = memo(function Page() {
         params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />
         ) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
     },
-    { field: 'createdAt', headerName: 'Created', flex: 1 },
-    { field: 'updatedAt', headerName: 'Updated', flex: 1 },
+    // { field: 'createdAt', headerName: 'Created', flex: 1 },
+    // { field: 'updatedAt', headerName: 'Updated', flex: 1 },
   ];
   const [filterColumns, setFilterColumns] = useState<any[]>();
   useEffect(() => {

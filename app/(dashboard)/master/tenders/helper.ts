@@ -55,7 +55,10 @@ const defaultPayload = {
     updatedAt: new Date(),
 };
 export const buildPayload = (input: any) => {
-    delete (input['slug']);
+    console.log("Input", input);
+    delete input['slug'];
+    delete input['createdAt'];
+    delete input['updatedAt'];
     return {
         ...defaultPayload,
         ...input,

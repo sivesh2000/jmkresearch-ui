@@ -174,7 +174,7 @@ const Page = memo(function Page() {
   const handleSave = async (data: any) => {
     const transformedData = {
       ...data,
-      parentId: data.parentId._id
+      parentId: data.parentId
     };
     try {
       if (isEdit) {
@@ -189,7 +189,6 @@ const Page = memo(function Page() {
         const resp = await addFunction(payload);
         console.log("Response", resp);
         setDrawer(false);
-        setFormData({ parentId: "", sub_category_name: "", slug: "", description: "", status: true, id: null, });
         toast.success("Sub Category created successfully!");
       }
       handleModalClose();
