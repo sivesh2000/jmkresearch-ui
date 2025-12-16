@@ -97,7 +97,7 @@ export const getTenderPayload = (companies: CompanyItem[], states: StateItem[]) 
         { field: 'tenderName', headerName: 'Tender Name', flex: 1, type: 'textbox' },
         { field: 'tenderNumber', headerName: 'Tender Number', flex: 1, type: 'textbox' },
         // { field: 'slug', headerName: 'Slug', flex: 1, type: 'textbox' },
-        { field: 'rfsIssueDate', headerName: 'RFS Issue Date', flex: 1, type: 'textbox' },
+        { field: 'rfsIssueDate', headerName: 'RFS Issue Date', flex: 1, type: 'date' },
         { field: 'bidSubmissionDeadline', headerName: 'BID Submission Deadline', flex: 1, type: 'textbox' },
         { field: 'technology', headerName: 'Technology', flex: 1, type: 'textbox' },
         { field: 'tenderingAuthority', headerName: 'Tender Ingauthority', flex: 1, type: 'textbox' },

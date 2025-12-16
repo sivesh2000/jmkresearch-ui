@@ -10,6 +10,9 @@ import {
     Accordion, AccordionActions, AccordionSummary, AccordionDetails,
     Stack,
 } from "@mui/material";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { styled } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloseIcon from "@mui/icons-material/Close";
@@ -33,6 +36,7 @@ interface CommonDrawerProps {
     title?: string;
     reset?: boolean;
     defaultValue?: any;
+    availableColumns?: any[];
 }
 
 const Root = styled('div')(({ theme }) => ({
@@ -44,7 +48,10 @@ const Root = styled('div')(({ theme }) => ({
     },
 }));
 
-const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, isOpen, setOpen, sx, columns, onApply, onClear, buttonOkLabel, buttonCancelLabel, buttonClearLabel, title }: CommonDrawerProps) {
+const CommonDrawer = memo(function CommonDrawer({ 
+    defaultValue, reset = true, isOpen, setOpen, sx, 
+    columns, onApply, onClear, buttonOkLabel, buttonCancelLabel, 
+    buttonClearLabel, title ,availableColumns}: CommonDrawerProps) {
     const [localData, setLocalData] = useState<any>({});
     const [formKey, setFormKey] = useState<string>('frm-0');
 
@@ -136,6 +143,13 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
                     </div>)
                 } else {
                     switch (column.type) {
+                        case 'date':
+                            return (<LocalizationProvider key={prefix + column.field} dateAdapter={AdapterDayjs}>
+                                <DatePicker className="dateInput" label={column.headerName}
+                                    sx={{ border: '0px', borderBottom: '1px solid #dedede' }}
+                                    value={parent && localData?.[parent]?.[column.field] !== undefined ? localData[parent][column.field] : localData?.[column.field] ?? null}
+                                    onChange={(newValue) => { onChangeHandler(column.field, newValue) }} />
+                            </LocalizationProvider>);
                         case 'textbox':
                             return (<TextField key={prefix + column.field} id={prefix + column.field} fullWidth variant="standard" label={column.headerName} margin="normal"
                                 value={parent && localData?.[parent]?.[column.field] !== undefined ? localData[parent][column.field] : localData?.[column.field] ?? null}
@@ -239,6 +253,8 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
             </Box>
         );
     }
+
+    
     return (<div>
         <Drawer anchor="right" open={isOpen} onClose={() => handleClose()}
             sx={{
@@ -257,6 +273,7 @@ const CommonDrawer = memo(function CommonDrawer({ defaultValue, reset = true, is
             <Box sx={{ height: 'calc(100vh - 100px)', overflow: 'auto', gap: 1 }}>
                 {/* Filter Form */}
                 {columns && <form onSubmit={onSubmit} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }} key={formKey}>
+                    {/* {renderColumnSelector(availableColumns)} */}
                     {renderInput(columns, '')}
                     <Box sx={{ display: "flex", gap: 1, mt: 2, bgcolor: "background.paper", pt: 2, }}>
                         {buttonOkLabel && <Button type="submit" variant="contained" className="button-primary button-common" fullWidth>{buttonOkLabel ? buttonOkLabel : 'OK'}</Button>}

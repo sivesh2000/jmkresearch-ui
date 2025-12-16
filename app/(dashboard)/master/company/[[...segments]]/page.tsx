@@ -123,7 +123,7 @@ const Page = memo(function Page() {
     { field: "contactInfo.pincode", headerName: "Pincode", flex: 1 },
   ];
 
-  const [newCompany, setNewCompany] = useState<any[]>();
+  const [newCompany, setNewCompany] = useState<any[]>([]);
   const [filterColumns, setFilterColumns] = useState<any[]>();
 
   useEffect(() => {
@@ -144,7 +144,7 @@ const Page = memo(function Page() {
     }
   }, [dispatch]);
 
-  useEffect(() => {fetcCompanies();}, [fetcCompanies]);
+  useEffect(() => { fetcCompanies(); }, [fetcCompanies]);
 
   useEffect(() => {
     // console.log("Active Makes:", activeCompanies);
@@ -255,7 +255,7 @@ const Page = memo(function Page() {
       setDrawer(true);
     } else if (task === "Delete") {
       setDeleteDialogOpen(true);
-    }  else if (task === "View") {
+    } else if (task === "View") {
       setDrawerAction("view");
       setDrawer(true);
     }
@@ -551,10 +551,14 @@ const Page = memo(function Page() {
             <ExportData
               dataArray={activeCompanies}
               type={"button"}
-              columns={columns}
+              columns={newCompany}
+              title="Export Company Data"
+              api='companies/export'
+              setOpen={setDrawer}
+              isOpen={isDrawer && drawerAction === "export"}
             />
 
-            <ImportData title="Import Data" />
+            <ImportData title="Import Data" template="company.csv" api="companies/import" />
             <Tooltip title="Filter company data" placement="top">
               <IconButton
                 size="small"
@@ -631,6 +635,7 @@ const Page = memo(function Page() {
         title={"Export Data"}
         isOpen={isDrawer && drawerAction === "export"}
         setOpen={setDrawer}
+        availableColumns={newCompany}
         columns={filterColumns}
         onApply={handleFilter}
         buttonOkLabel="Export"

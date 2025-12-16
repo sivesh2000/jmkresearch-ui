@@ -621,8 +621,9 @@ const Page = memo(function Page() {
                 <AddIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <ExportData dataArray={activeTenders} type={'button'} columns={columns} />
-            <ImportData title="Import Data" />
+            <ExportData dataArray={activeTenders} type={"button"} columns={editableColumns} title="Export Tender Data" api='tenders/export'
+              setOpen={setDrawer} isOpen={isDrawer && drawerAction === "export"}/>
+            <ImportData title="Import Data" template="tenders.csv" api="tenders/import"/>
             <Tooltip title="Filter tender data" placement="top">
               <IconButton
                 size="small"
