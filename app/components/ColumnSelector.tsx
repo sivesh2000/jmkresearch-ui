@@ -19,12 +19,21 @@ interface ColumnSelectorProps {
 const ColumnSelector = memo(function ColumnSelector({ options, selCol, setSelCol }: ColumnSelectorProps) {
     const [viewCols, setViewCols] = useState(false);
     const [checked, setChecked] = useState<any[]>(selCol);
+    
     const handleToggle = (value: any) => {
         const isExist = checked.find(x => x.field === value.field);
         if (isExist) {
             setChecked(checked.filter(x => x.field !== value.field));
         } else {
             setChecked([...checked, value]);
+        }
+    };
+
+    const handleSelectAll = () => {
+        if (checked.length === options.length) {
+            setChecked([]);
+        } else {
+            setChecked([...options]);
         }
     };
 
@@ -52,6 +61,20 @@ const ColumnSelector = memo(function ColumnSelector({ options, selCol, setSelCol
                     borderRadius: { xs: 0, sm: 2 }, overflow: "auto",
                 }}>
                     <Typography variant="h6" mb={3}>Select Columns</Typography>
+
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={handleSelectAll} dense>
+                            <ListItemIcon>
+                                <Checkbox 
+                                    edge="start" 
+                                    checked={checked.length === options.length && options.length > 0}
+                                    indeterminate={checked.length > 0 && checked.length < options.length}
+                                    disableRipple 
+                                />
+                            </ListItemIcon>
+                            <ListItemText primary="Select All" sx={{ fontWeight: 'bold' }} />
+                        </ListItemButton>
+                    </ListItem>
 
                     <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', position: 'relative', overflow: 'auto', maxHeight: 300, '& ul': { padding: 0 }, }}>
                         {options.map((e: GridColDef, tIndex: number) => {

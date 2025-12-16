@@ -68,6 +68,7 @@ const Page = memo(function Page() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteRow, setDeleteRow] = useState<any>(null);
+  const [searchValue, setSearchValue] = useState<String>("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editRow, setEditRow] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -82,10 +83,11 @@ const Page = memo(function Page() {
   const [drawerAction, setDrawerAction] = useState<'filter' | 'add' | 'edit' | 'import' | 'view' | 'export'>('filter');
   const open = Boolean(anchorEl);
   const [selCol, setSelCol] = useState<GridColDef[]>([]);
+  
   const optionalColumns: GridColDef[] = [
-    { field: 'tenderName', headerName: 'Tender Name', flex: 1 },
-    { field: 'tenderNumber', headerName: 'Tender Number', flex: 1 },
-    // { field: 'slug', headerName: 'Slug', flex: 1 },
+    // { field: 'tenderName', headerName: 'Tender Name', flex: 1 },
+    // { field: 'tenderNumber', headerName: 'Tender Number', flex: 1 },
+    { field: 'slug', headerName: 'Slug', flex: 1 },
     { field: 'rfsIssueDate', headerName: 'RFS Issue Date', flex: 1 },
     { field: 'bidSubmissionDeadline', headerName: 'BID Submission Deadline', flex: 1 },
     { field: 'technology', headerName: 'Technology', flex: 1 },
@@ -102,7 +104,7 @@ const Page = memo(function Page() {
     { field: 'notes', headerName: 'Notes', flex: 1 },
     { field: 'winnersDetails', headerName: 'Winners Details', flex: 1 },
     { field: 'ppaSigningDate', headerName: 'PPA Signing Date', flex: 1 },
-    { field: 'location', headerName: 'Location', flex: 1 },
+    // { field: 'location', headerName: 'Location', flex: 1 },
     { field: 'resultAnnouncedDate', headerName: 'Result Announced Date', flex: 1 },
     { field: 'companyId', headerName: 'Company ID', flex: 1 },
     { field: 'stateId', headerName: 'State ID', flex: 1 },
@@ -143,44 +145,46 @@ const Page = memo(function Page() {
     // console.log("Active Makes:", activeTenders);
   }, [activeTenders]);
 
-  const [columns, setColumns] = useState<GridColDef[]>([
-    { field: "tenderName", headerName: "Tender Name", flex: 1 },
-    { field: "tenderNumber", headerName: "Tender Number", flex: 1 },
-    { field: "location", headerName: "Location", flex: 1 },
-    {
-      field: "isActive",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params: any) =>
-        params.value ? (
-          <Chip
-            label="Active"
-            color="success"
-            size="small"
-            variant="outlined"
-          />
-        ) : (
-          <Chip
-            label="Inactive"
-            size="small"
-            color="default"
-            variant="outlined"
-          />
-        ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 90,
-      renderCell: (params) => (
-        <>
-          <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
-            <MoreVertIcon color="action" />
-          </IconButton>
-        </>
-      ),
-    },
-  ]);
+  const [columns, setColumns] = useState<GridColDef[]>([]);
+
+  // const [columns, setColumns] = useState<GridColDef[]>([
+  //   { field: "tenderName", headerName: "Tender Name", flex: 1 },
+  //   { field: "tenderNumber", headerName: "Tender Number", flex: 1 },
+  //   { field: "location", headerName: "Location", flex: 1 },
+  //   {
+  //     field: "isActive",
+  //     headerName: "Status",
+  //     flex: 1,
+  //     renderCell: (params: any) =>
+  //       params.value ? (
+  //         <Chip
+  //           label="Active"
+  //           color="success"
+  //           size="small"
+  //           variant="outlined"
+  //         />
+  //       ) : (
+  //         <Chip
+  //           label="Inactive"
+  //           size="small"
+  //           color="default"
+  //           variant="outlined"
+  //         />
+  //       ),
+  //   },
+  //   {
+  //     field: "actions",
+  //     headerName: "Actions",
+  //     width: 90,
+  //     renderCell: (params) => (
+  //       <>
+  //         <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
+  //           <MoreVertIcon color="action" />
+  //         </IconButton>
+  //       </>
+  //     ),
+  //   },
+  // ]);
 
   useEffect(() => {
     if (selCol) {
@@ -188,40 +192,15 @@ const Page = memo(function Page() {
         { field: "tenderName", headerName: "Tender Name", flex: 1 },
         { field: "tenderNumber", headerName: "Tender Number", flex: 1 },
         { field: "location", headerName: "Location", flex: 1 },
-        {
-          field: "isActive",
-          headerName: "Status",
-          flex: 1,
-          renderCell: (params: any) =>
-            params.value ? (
-              <Chip
-                label="Active"
-                color="success"
-                size="small"
-                variant="outlined"
-              />
-            ) : (
-              <Chip
-                label="Inactive"
-                size="small"
-                color="default"
-                variant="outlined"
-              />
-            ),
-        },
         ...selCol,
         {
-          field: "actions",
-          headerName: "Actions",
-          width: 90,
-          renderCell: (params) => (
-            <>
-              <IconButton
-                onClick={(event) => handleOpenMenu(event, params.row)}
-              >
-                <MoreVertIcon color="action" />
-              </IconButton>
-            </>
+          field: "isActive", headerName: "Status", flex: 1, renderCell: (params: any) => params.value ? (<Chip label="Active" color="success" size="small" variant="outlined" />) : (<Chip label="Inactive" size="small" color="default" variant="outlined" />),
+        },
+        {
+          field: "actions", headerName: "Actions", width: 100, renderCell: (params) => (
+            <IconButton onClick={(event) => handleOpenMenu(event, params.row)}>
+              <MoreVertIcon color="action" />
+            </IconButton>
           ),
         },
       ]);
@@ -241,8 +220,19 @@ const Page = memo(function Page() {
   };
 
   const handleAction = (task: string) => {
-    setEditRow(selectedRow);
     if (task === "Edit") {
+      const selectedCompany = activeCompanies.find((comp: any) => 
+        comp.id === selectedRow?.companyId?.id || comp.name === selectedRow?.companyId?.name
+      );
+      const selectedState = activeStates.find((sta: any) => 
+        sta._id === selectedRow?.stateId?._id || sta.name === selectedRow?.stateId?.name
+      );
+      const editRowData = {
+        ...selectedRow,
+        company: selectedCompany || null,
+        state: selectedState || null
+      };
+      setEditRow(editRowData);
       setIsEdit(true);
       setDrawerAction('edit');
       setDrawer(true);
@@ -251,9 +241,9 @@ const Page = memo(function Page() {
       setDeleteRow(selectedRow);
       setDeleteDialogOpen(true);
     } else if (task === "View") {
+      setEditRow(selectedRow);
       setDrawerAction('view');
       setDrawer(true);
-      setIsEdit(false);
     } else {
       console.log(`${task} clicked for:`, selectedRow);
     }
@@ -265,10 +255,10 @@ const Page = memo(function Page() {
       const deleteId = deleteRow.id;
       const deleteFunction = deleteTender(dispatch);
       await deleteFunction(deleteId);
-      toast.success("Make deleted successfully!");
+      toast.success("Tender deleted successfully!");
     } catch (err) {
       toast.error(
-        "Failed to delete make." + (err as any).response.data.message || ""
+        "Failed to delete tender." + (err as any).response.data.message || ""
       );
     }
     setDeleteDialogOpen(false);
@@ -280,24 +270,25 @@ const Page = memo(function Page() {
     setDeleteRow(null);
   };
 
-  const handleAddClick = () => {
-    setFormData({ make_name: "", status: true, id: null });
-    setIsEdit(false);
-    setModalOpen(true);
-  };
+  // const handleAddClick = () => {
+  //   setFormData({ make_name: "", status: true, id: null });
+  //   setIsEdit(false);
+  //   setModalOpen(true);
+  // };
 
   const handleModalClose = () => {
     setModalOpen(false);
-    setFormData({ make_name: "", status: true, id: null });
+    // setFormData({ make_name: "", status: true, id: null });
   };
 
   const handleSave = async (data: any) => {
     console.log(data, "HandleSave")
     let transformedData = {
       ...data,
-      companyId: data.company.id,
-      stateId: data.state._id,
+      companyId: data?.company?.id,
+      stateId: data?.state?._id,
     };
+    console.log(transformedData, "transformedDatatransformedData")
     delete transformedData.company;
     delete transformedData.state;
     try {
@@ -325,9 +316,9 @@ const Page = memo(function Page() {
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  // const handleInputChange = (field: string, value: any) => {
+  //   setFormData((prev) => ({ ...prev, [field]: value }));
+  // };
 
   const handleFilter = (params: any) => {
     console.log("Params", params);
@@ -353,90 +344,90 @@ const Page = memo(function Page() {
     );
   };
 
-  const TenderModel = () => {
-    return (
-      <Modal open={modalOpen} onClose={handleModalClose}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: { xs: 0, sm: "50%" },
-            left: { xs: 0, sm: "50%" },
-            transform: { xs: "none", sm: "translate(-50%, -50%)" },
-            width: { xs: "100vw", sm: 400 },
-            height: { xs: "100vh", sm: "auto" },
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: { xs: 2, sm: 4 },
-            borderRadius: { xs: 0, sm: 2 },
-            overflow: "auto",
-          }}
-        >
-          <Typography variant="h6" component="h2" mb={3}>
-            {isEdit ? "Edit Tender" : "Add New Tender"}
-          </Typography>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Tender Name"
-            value={formData.make_name}
-            onChange={(e) => handleInputChange("tender_name", e.target.value)}
-            margin="normal"
-          />
-          <FormControl fullWidth variant="standard" margin="normal">
-            <InputLabel>Player Type</InputLabel>
-            <Select
-              // value={filterValue}
-              // onChange={(e) => setFilterValue(e.target.value)}
-              label="Player Type"
-            >
-              {players &&
-                players.map((player: any, index: number) => (
-                  <MenuItem key={index} value={player}>
-                    {player}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Brief Overview"
-            value={formData.make_name}
-            onChange={(e) =>
-              handleInputChange("brief_overview", e.target.value)
-            }
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Address"
-            value={formData.make_name}
-            onChange={(e) => handleInputChange("address", e.target.value)}
-            margin="normal"
-          />
-          <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-            <Button
-              className="button-common button-primary"
-              variant="contained"
-              onClick={handleSave}
-              fullWidth
-            >
-              Save
-            </Button>
-            <Button
-              className="button-common buttonColor"
-              variant="outlined"
-              onClick={handleModalClose}
-              fullWidth
-            >
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-    );
-  };
+  // const TenderModel = () => {
+  //   return (
+  //     <Modal open={modalOpen} onClose={handleModalClose}>
+  //       <Box
+  //         sx={{
+  //           position: "absolute",
+  //           top: { xs: 0, sm: "50%" },
+  //           left: { xs: 0, sm: "50%" },
+  //           transform: { xs: "none", sm: "translate(-50%, -50%)" },
+  //           width: { xs: "100vw", sm: 400 },
+  //           height: { xs: "100vh", sm: "auto" },
+  //           bgcolor: "background.paper",
+  //           boxShadow: 24,
+  //           p: { xs: 2, sm: 4 },
+  //           borderRadius: { xs: 0, sm: 2 },
+  //           overflow: "auto",
+  //         }}
+  //       >
+  //         <Typography variant="h6" component="h2" mb={3}>
+  //           {isEdit ? "Edit Tender" : "Add New Tender"}
+  //         </Typography>
+  //         <TextField
+  //           fullWidth
+  //           variant="standard"
+  //           label="Tender Name"
+  //           value={formData.make_name}
+  //           onChange={(e) => handleInputChange("tender_name", e.target.value)}
+  //           margin="normal"
+  //         />
+  //         <FormControl fullWidth variant="standard" margin="normal">
+  //           <InputLabel>Player Type</InputLabel>
+  //           <Select
+  //             // value={filterValue}
+  //             // onChange={(e) => setFilterValue(e.target.value)}
+  //             label="Player Type"
+  //           >
+  //             {players &&
+  //               players.map((player: any, index: number) => (
+  //                 <MenuItem key={index} value={player}>
+  //                   {player}
+  //                 </MenuItem>
+  //               ))}
+  //           </Select>
+  //         </FormControl>
+  //         <TextField
+  //           fullWidth
+  //           variant="standard"
+  //           label="Brief Overview"
+  //           value={formData.make_name}
+  //           onChange={(e) =>
+  //             handleInputChange("brief_overview", e.target.value)
+  //           }
+  //           margin="normal"
+  //         />
+  //         <TextField
+  //           fullWidth
+  //           variant="standard"
+  //           label="Address"
+  //           value={formData.make_name}
+  //           onChange={(e) => handleInputChange("address", e.target.value)}
+  //           margin="normal"
+  //         />
+  //         <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
+  //           <Button
+  //             className="button-common button-primary"
+  //             variant="contained"
+  //             onClick={handleSave}
+  //             fullWidth
+  //           >
+  //             Save
+  //           </Button>
+  //           <Button
+  //             className="button-common buttonColor"
+  //             variant="outlined"
+  //             onClick={handleModalClose}
+  //             fullWidth
+  //           >
+  //             Cancel
+  //           </Button>
+  //         </Box>
+  //       </Box>
+  //     </Modal>
+  //   );
+  // };
 
   const DeleteDialog = () => {
     return (
@@ -505,49 +496,19 @@ const Page = memo(function Page() {
           </IconButton>
         </Tooltip>
         <Modal open={viewCols} onClose={() => setViewCols(false)}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: { xs: 0, sm: "50%" },
-              left: { xs: 0, sm: "50%" },
-              transform: { xs: "none", sm: "translate(-50%, -50%)" },
-              width: { xs: "100vw", sm: 400 },
-              height: { xs: "100vh", sm: "auto" },
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              p: { xs: 2, sm: 4 },
-              borderRadius: { xs: 0, sm: 2 },
-              overflow: "auto",
-            }}
-          >
-            <Typography variant="h6" mb={3}>
+          <Box sx={{ position: "absolute", top: { xs: 0, sm: "50%" }, left: { xs: 0, sm: "50%" }, transform: { xs: "none", sm: "translate(-50%, -50%)" }, width: { xs: "100vw", sm: 400 }, height: { xs: "100vh", sm: "auto" }, bgcolor: "background.paper", boxShadow: 24, p: { xs: 2, sm: 4 }, borderRadius: { xs: 0, sm: 2 }, overflow: "auto", }}>
+          <Typography variant="h6" mb={3}>
               Select Columns
             </Typography>
 
-            <List
-              sx={{
-                width: "100%",
-                maxWidth: 360,
-                bgcolor: "background.paper",
-                position: "relative",
-                overflow: "auto",
-                maxHeight: 300,
-                "& ul": { padding: 0 },
-              }}
-            >
+            <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", position: "relative", overflow: "auto", maxHeight: 300, "& ul": { padding: 0 }, }}>
               {options.map((e: GridColDef) => {
                 const labelId = `checkbox-list-label-${e.field}`;
                 return (
                   <ListItem key={e.field} disablePadding>
                     <ListItemButton onClick={() => handleToggle(e)} dense>
                       <ListItemIcon>
-                        <Checkbox
-                          edge="start"
-                          checked={checked.includes(e)}
-                          tabIndex={-1}
-                          disableRipple
-                          inputProps={{ "aria-labelledby": labelId }}
-                        />
+                        <Checkbox edge="start" checked={checked.includes(e)} tabIndex={-1} disableRipple inputProps={{ "aria-labelledby": labelId }} />
                       </ListItemIcon>
                       <ListItemText id={labelId} primary={e.headerName} />
                     </ListItemButton>
@@ -557,24 +518,10 @@ const Page = memo(function Page() {
             </List>
 
             <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
-              <Button
-                className="button-common button-primary"
-                variant="contained"
-                fullWidth
-                onClick={() => {
-                  console.log("Selected", checked);
-                  setSelCol(checked);
-                  // setViewCols(false);
-                }}
-              >
+              <Button className="button-common button-primary" variant="contained" fullWidth onClick={() => { console.log("Selected", checked); setSelCol(checked); }}>
                 OK
               </Button>
-              <Button
-                className="button-common buttonColor"
-                variant="outlined"
-                fullWidth
-                onClick={() => setViewCols(false)}
-              >
+              <Button className="button-common buttonColor" variant="outlined" fullWidth onClick={() => setViewCols(false)}>
                 Cancel
               </Button>
             </Box>
@@ -589,27 +536,13 @@ const Page = memo(function Page() {
       <Paper sx={{ height: "auto", width: "100%" }}>
         <Box sx={{ padding: 1, display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ textAlign: "left", display: "flex", justifyContent: "center", alignItems: "center", gap: 1 }}>
-            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Tender Name1" margin="normal" />
+            <TextField sx={{ width: '300px' }} variant="standard" placeholder="Tender Name1" margin="normal" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
             <Box sx={{ textAlign: "right", pt: 2 }}>
-              <IconButton
-                size="small"
-                sx={{
-                  background: "#dedede",
-                  mr: 1,
-                  "&:hover": { color: "red" },
-                }}
-              >
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: searchValue }); }}>
                 <SearchIcon fontSize="small" />
               </IconButton>
 
-              <IconButton
-                size="small"
-                sx={{
-                  background: "#dedede",
-                  mr: 1,
-                  "&:hover": { color: "red" },
-                }}
-              >
+              <IconButton size="small" sx={{ background: "#dedede", mr: 1, "&:hover": { color: "red" }, }} onClick={() => { handleFilter({ search: '' }); setSearchValue(""); }}>
                 <CloseIcon fontSize="small" />
               </IconButton>
             </Box>
@@ -639,17 +572,10 @@ const Page = memo(function Page() {
             </Tooltip>
           </Box>
         </Box>
-        <LazyDataGrid
-          rows={activeTenders}
-          getRowId={(row: any) => row.id}
-          columns={columns}
-          loading={isLoading}
-          paginationModel={paginationModel}
-          pageSizeOptions={[5, 10]}
-        />
+        <LazyDataGrid rows={activeTenders} getRowId={(row: any) => row.id} columns={columns} loading={isLoading} paginationModel={paginationModel} pageSizeOptions={[5, 10]} />
       </Paper>
       <MenuComponent />
-      <TenderModel />
+      {/* <TenderModel /> */}
       <DeleteDialog />
       <CommonDrawer title={'View Tender Info'} isOpen={isDrawer && drawerAction === 'view'} setOpen={setDrawer} defaultValue={editRow} buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
       <CommonDrawer title={'Filter Options'} isOpen={isDrawer && drawerAction === 'filter'} setOpen={setDrawer} columns={filterColumns} onApply={handleFilter} buttonOkLabel="Apply Filter" buttonCancelLabel="Cancel" buttonClearLabel="Clear" />
