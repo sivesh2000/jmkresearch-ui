@@ -23,7 +23,7 @@ interface StateItem {
 const defaultPayload = {
     tenderName: "",
     tenderNumber: "",
-    slug: "",
+    // slug: "",
     rfsIssueDate: "",
     bidSubmissionDeadline: "",
     technology: "",
@@ -51,18 +51,43 @@ const defaultPayload = {
     tenderDocuments: [],
 
     isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    // createdAt: new Date(),
+    // updatedAt: new Date(),
 };
-export const buildPayload = (input: any) => {
+export const buildPayload = (input: any, action:String="edit") => {
     console.log("Input", input);
-    delete input['slug'];
-    delete input['createdAt'];
-    delete input['updatedAt'];
-    return {
+    // delete input['slug'];
+    // delete input['company'];
+    // delete input['state'];
+    // delete input['createdAt'];
+    // delete input['updatedAt'];
+    // return {
+    //     ...defaultPayload,
+    //     ...input,
+    // };
+
+    let response ={
         ...defaultPayload,
         ...input,
+        isActive: input.value || true
     };
+    if(action === 'new'){
+        delete input['slug'];
+        delete input['company'];
+        delete input['state'];
+        delete input['createdAt'];
+        delete input['updatedAt'];
+    }
+    if(action === 'edit'){
+        delete response['id'];
+        delete response['tenderDocuments'];
+        delete input['slug'];
+        delete input['company'];
+        delete input['state'];
+        delete input['createdAt'];
+        delete input['updatedAt'];
+    }
+    return response;
 };
 
 export const getTenderPayload = (companies: CompanyItem[], states: StateItem[]) => {

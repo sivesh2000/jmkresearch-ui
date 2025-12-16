@@ -51,7 +51,7 @@ export const editTender =
     try {
       console.log("id:", id, "formdata", formData);
       dispatch(setLoading(true));
-      const response = await axiosInstance.put(`tenders/${id}`, formData);
+      const response = await axiosInstance.patch(`tenders/${id}`, formData);
       dispatch(setError(null));
       // Refresh the tenders list after edit
       await getAllActiveTenders(dispatch, {})();
